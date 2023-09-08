@@ -1,0 +1,11 @@
+node_modules
+index/*
+html/*
+images/*
+images-converted/*
+old-files/*
+w/*
+log
+testList
+.vscode/*
+.DS_Store
