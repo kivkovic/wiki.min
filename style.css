@@ -170,6 +170,10 @@ h6 {
   padding: 7px 10px;
 }
 
+.ib th {
+  padding: 7px 10px;
+}
+
 .ibs {
   width: 23em;
   border-collapse: collapse;
@@ -610,4 +614,23 @@ div.mwh {
 .hlist {
   display: flex;
   flex-wrap: wrap;
+}
+
+figure {
+  display: table;
+}
+
+figure img {
+  max-width: 40vw;
+  height: auto;
+}
+
+figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  margin: 0.5em 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0 !important;
+  color: #54595d;
 }
