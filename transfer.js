@@ -37,7 +37,9 @@ Object.keys(redirects).forEach(k => {
 
 let timeSum = 1;
 let count = 1;
-const files = fs.readdirSync('./html');
+
+//const files = fs.readdirSync('./html');
+const files = ['Denmark.html'];
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
@@ -62,6 +64,10 @@ const closestImgParent = (e, debug) => {
     if (e.parentNode.tagName.toLowerCase() == 'figure') return e.parentNode;
     const closestFigure = e.closest('figure');
     if (closestFigure) return closestFigure;
+    const tsingle = e.closest('.tsingle');
+    if (tsingle) return tsingle;
+    const thumbcaption = e.closest('.thumbcaption');
+    if (thumbcaption) return thumbcaption;
     const closestCell = e.closest('.ib-settlement-cols-cell');
     if (closestCell) return closestCell;
     if (e.parentNode.tagName.toLowerCase() == 'a') return e.parentNode;
@@ -130,7 +136,18 @@ for (let i = 0; i < files.length; i++) {
                 return;
             }
 
-            e.replaceWith(`<img src="${srclocal}" width="${width}" height="${height}" />`);
+            let width2 = width, height2 = height;
+            if (width >= 640 && !src.match(/\.(svg|png)$/i)) {
+                width2 = width / 2;
+                height2 = height / 2;
+            }
+
+            const figure = e.closest('figure');
+            if (figure && !figure.classList.contains('mw-halign-left') && !figure.classList.contains('mw-halign-right')) {
+                figure.classList.add('hal');
+            }
+
+            e.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
         container.querySelectorAll('[data-src]').forEach(e => {
@@ -144,11 +161,34 @@ for (let i = 0; i < files.length; i++) {
                 return;
             }
 
-            e.replaceWith(`<img src="${srclocal}" width="${width}" height="${height}" />`);
+            let width2 = width, height2 = height;
+            if (width >= 640 && !src.match(/\.(svg|png)$/i)) {
+                width2 = width / 2;
+                height2 = height / 2;
+            }
+
+            const figure = e.closest('figure');
+            if (figure && !figure.classList.contains('mw-halign-left') && !figure.classList.contains('mw-halign-right')) {
+                figure.classList.add('hal');
+            }
+
+            e.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
-        container.querySelectorAll('link,script,noscript,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution').forEach(e => {
+        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution').forEach(e => {
             e.remove();
+        });
+
+        container.querySelectorAll('div,span').forEach(e => {
+            if (e.getAttribute('style')?.length > 60) return;
+
+            if (e.childNodes.length == 0) {
+                if (e.parentNode.childNodes.length == 1) {
+                    e.parentNode.remove();
+                } else {
+                    e.remove();
+                }
+            }
         });
 
         /*container.querySelectorAll('[src]').forEach(e => {
@@ -273,6 +313,7 @@ for (let i = 0; i < files.length; i++) {
             'rt-commentedText': 'ct',
             'section-heading': 'sh',
             'wikitable': 'wt',
+            'pcs-widen-image-ancestor': null,
         };
 
         for (const c in classes) {
@@ -298,11 +339,11 @@ for (let i = 0; i < files.length; i++) {
             e.replaceWith(e.innerHTML);
         });
 
-        container.querySelectorAll('span').forEach(e => {
+        /*container.querySelectorAll('span').forEach(e => {
             if (e.innerHTML.trim().length == 0) {
                 e.replaceWith('');
             }
-        })
+        })*/
 
         container.querySelectorAll('[class=""]').forEach(e => {
             e.removeAttribute('class');
@@ -346,4 +387,5 @@ for (let i = 0; i < files.length; i++) {
     const fullDuration = (end - start) / 1000;
     timeSum += fullDuration;
     count++;
+
 }
