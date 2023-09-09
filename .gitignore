@@ -5,6 +5,7 @@ images/*
 images-converted/*
 old-files/*
 w/*
+i/*
 log
 testList
 .vscode/*
