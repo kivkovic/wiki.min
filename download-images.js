@@ -2,7 +2,8 @@ const fs = require('fs');
 const https = require('https');
 
 const imagesRaster = fs.readFileSync('index/images-raster').toString().split('\n').map(e => e.split('\t')).map(([u,s]) => ({ u, s }));
-const imagesVector = fs.readFileSync('index/images-svg').toString().split('\n');
+//const imagesVector = fs.readFileSync('index/images-svg').toString().split('\n');
+const imagesVector = fs.readFileSync('index/images-svg').toString().split('\n').filter(s => s).map(e => e.split('\t')).map(([u,s]) => ({ u, s }));
 
 function download(url, filepath) {
     return new Promise((resolve, reject) => {
@@ -24,26 +25,33 @@ function download(url, filepath) {
 (async function () {
     let elapsed = 0;
     let skipped = 0;
-    const delay = 500;
+    const delay = 200;
 
     for (let i = 0; i < imagesVector.length; i++) {
         const start = +new Date();
 
+        /*
         const u = imagesVector[i].replace(/\/thumb\//, '/');
         let filename = u.split('/').slice(-1)[0];
+        */
 
-        if (filename.length >= 255) {
+        const img = imagesVector[i];
+        let filename = img.u.split('/').slice(-1)[0].replace(/\?.+$/,'');
+
+        if (filename.length >= 250) {
             // IMPORTANT: max file name limit on os is 255, fix these paths in html manually later!
-            filename = filename.slice(0,250) + filename.match(/\.[a-z]+$/i);
+            filename = filename.slice(0,245) + filename.match(/\.[a-z]+$/i);
         }
 
-        if (fs.existsSync('images/' + filename)) {
+        if (fs.existsSync('images/' + filename + '.png')) {
             skipped++;
             continue;
         }
 
-        const url = 'https:' + u;
-        await download(url, 'images/' + filename);
+        //const url = 'https:' + img.u;
+        const size = img.s && img.s != 'null' ? img.s : 480;
+        const url = 'https:' + img.u + '/' + (size) + 'px-' + filename + '.png';
+        await download(url, 'images/' + filename + '.png');
 
         const end = +new Date();
         console.log(filename, 'time:', end - start, 'ms')
@@ -62,6 +70,7 @@ function download(url, filepath) {
         }
     }
 
+    /*
     elapsed = 0;
     skipped = 0;
 
@@ -69,7 +78,8 @@ function download(url, filepath) {
         const start = +new Date();
 
         const img = imagesRaster[i];
-        const filename = img.u.split('/').slice(-1)[0];
+        const filename = img.u.split('/').slice(-1)[0].replace(/\?.+$/,'');
+
         let filenameFS = filename;
 
         if (filenameFS.length >= 255) {
@@ -94,22 +104,22 @@ function download(url, filepath) {
             url += '.jpg';
         }
 
-        if (path.match(/\/(lossy-)?page\d/)) { // some tiffs etc
+        if (filename.match(/\.xcf$/i)) {
+            url += '.png';
+        }
+
+        if (path.match(/\/((lossy|lossless)-)?page\d+/) || path.match(/\/wikihiero\//) || path.match(/wikimedia\.org\/score\//) || path.match(/\/wikipedia\/[a-z]+\/timeline\//)) {
             url = 'https:' + path;
         }
 
-        //process.exit()
-        //upload.wikimedia.org/wikipedia/commons/thumb/7/76/2-%D1%8F_%D0%B3%D0%B2%D0%B0%D1%80%D0%B4%D0%B5%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%A2%D0%B0%D0%BC%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BC%D0%BE%D1%82%D0%BE%D1%81%D1%82%D1%80%D0%B5%D0%BB%D0%BA%D0%BE%D0%B2%D0%B0%D1%8F_%D0%B4%D0%B8%D0%B2%D0%B8%D0%B7%D0%B8%D1%8F.jpg/15px-2-%D1%8F_%D0%B3%D0%B2%D0%B0%D1%80%D0%B4%D0%B5%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%A2%D0%B0%D0%BC%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BC%D0%BE%D1%82%D0%BE%D1%81%D1%82%D1%80%D0%B5%D0%BB%D0%BA%D0%BE%D0%B2%D0%B0%D1%8F_%D0%B4%D0%B8%D0%B2%D0%B8%D0%B7%D0%B8%D1%
-        //upload.wikimedia.org/wikipedia/commons/thumb/7/76/2-%D1%8F_%D0%B3%D0%B2%D0%B0%D1%80%D0%B4%D0%B5%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%A2%D0%B0%D0%BC%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BC%D0%BE%D1%82%D0%BE%D1%81%D1%82%D1%80%D0%B5%D0%BB%D0%BA%D0%BE%D0%B2%D0%B0%D1%8F_%D0%B4%D0%B8%D0%B2%D0%B8%D0%B7%D0%B8%D1%8F.jpg	15
-
-
+        console.log(url);
         //const host = url.slice('https://'.length).split('/')[0];
         //const path = url.slice('https://'.length).split('/').slice(1).join('/')
         //await download(host, path, 'images/' + filename);
         await download(url, 'images/' + filenameFS);
 
         const end = +new Date();
-        console.log(filename, 'time:', end - start, 'ms')
+        console.log('time:', end - start, 'ms')
         if (end - start < delay) {
             await new Promise(r => setTimeout(r, Math.max(200, Math.min(delay, delay - (end - start)))));
         }
@@ -124,4 +134,5 @@ function download(url, filepath) {
             console.log(`${i+1}/${imagesRaster.length}`);
         }
     }
+    */
 })();

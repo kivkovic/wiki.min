@@ -13,8 +13,32 @@ Object.keys(redirects).forEach(k => {
 
 let timeSum = 1;
 let count = 1;
-const files = fs.readdirSync('./html');
-//const files = ['Zadar.html'];
+//const files = fs.readdirSync('./html');
+const files = ['Zadar.html'];
+
+const getimgsrc = (path) => {
+    const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
+    const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
+    const finalpath = 'i/' + mainanme + '.webp';
+
+    if (!fs.existsSync(finalpath)) {
+        return null;
+    }
+
+    return encodeURIComponent(finalpath);
+};
+
+const closestImgParent = (e, debug) => {
+
+    if (e.parentNode.tagName.toLowerCase() == 'figure') return e.parentNode;
+    const closestFigure = e.closest('figure');
+    if (closestFigure) return closestFigure;
+    const closestCell = e.closest('.ib-settlement-cols-cell');
+    if (closestCell) return closestCell;
+    if (e.parentNode.tagName.toLowerCase() == 'a') return e.parentNode;
+
+    return e;
+};
 
 for (let i = 0; i < files.length; i++) {
     const f = files[i];
@@ -49,19 +73,31 @@ for (let i = 0; i < files.length; i++) {
 
             const width = e.querySelector('[data-width]').getAttribute('data-width');
             const height = e.querySelector('[data-height]').getAttribute('data-height');
-            const srclocal = src.split('/').slice(-1)[0];
-            e.innerHTML = `<img src="images/${srclocal}" width="${width}" height="${height}" />`
+            const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
+
+            if (srclocal == null) {
+                e.remove();
+                return;
+            }
+
+            e.innerHTML = `<img src="${srclocal}" width="${width}" height="${height}" />`
         });
 
         container.querySelectorAll('[data-src]').forEach(e => {
             const src = e.getAttribute('data-src');
             const width = e.getAttribute('data-width');
             const height = e.getAttribute('data-height');
-            const srclocal = src.split('/').slice(-1)[0];
-            e.replaceWith(`<img src="images/${srclocal}" width="${width}" height="${height}" />`);
+            const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
+
+            if (srclocal == null) {
+                closestImgParent(e, 1).remove();
+                return;
+            }
+
+            e.replaceWith(`<img src="${srclocal}" width="${width}" height="${height}" />`);
         });
 
-        container.querySelectorAll('source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution').forEach(e => {
+        container.querySelectorAll('link,script,noscript,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution').forEach(e => {
             e.remove();
         });
 
@@ -71,26 +107,87 @@ for (let i = 0; i < files.length; i++) {
                 return;
             }
             const resource = e.getAttribute('resource').replace(/^\.\/File:/,'');
-            e.setAttribute('src', 'images/' + resource);
+            const srclocal = getimgsrc(resource);
+
+            if (srclocal == null) {
+                closestImgParent(e, 2).remove();
+                return;
+            }
+
+            e.setAttribute('src', srclocal);
             e.removeAttribute('resource');
         });
 
-        container.querySelectorAll('*').forEach(e => {
-            e.removeAttribute('data-mw-section-id');
-            e.removeAttribute('about');
-            e.removeAttribute('style');
-            e.removeAttribute('title');
-            e.removeAttribute('alt');
-            e.removeAttribute('alttext');
-            e.removeAttribute('role');
-            e.removeAttribute('note');
-            e.removeAttribute('decoding');
-            e.removeAttribute('data-file-width');
-            e.removeAttribute('data-file-height');
-            e.removeAttribute('data-file-type');
-            e.removeAttribute('srcset');
-            e.classList.remove('navigation-not-searchable');
+        const atts = [
+            'data-mw-section-id',
+            'about',
+            'style',
+            'title',
+            'alt',
+            'usemap',
+            'alttext',
+            'role',
+            'note',
+            'decoding',
+            'data-file-width',
+            'data-file-height',
+            'data-file-type',
+            'srcset',
+        ];
+
+        for (const a of atts) {
+            container.querySelectorAll('['+a+']').forEach(e => {
+                e.removeAttribute(a);
+            });
+        }
+
+        container.querySelectorAll('[dir="ltr"]').forEach(e => {
+            e.removeAttribute('dir');
         });
+
+        const classes = {
+            'collapsible-block-js': null,
+            'collapsible-block': null,
+            'collapsible-heading': null,
+            'floatright': 'fr',
+            'ib-settlement-caption-link': 'ibscl',
+            'ib-settlement-cols-cell': 'ibscc',
+            'ib-settlement-cols-row': 'ibscr',
+            'image-lazy-loaded': null,
+            'infobox-full-data': 'ibfd',
+            'infobox-image': 'ibi',
+            'infobox': 'ib',
+            'maptable': 'mt',
+            'mergedrow': 'mr',
+            'mergedtoprow': 'mtr',
+            'mf-section-0': null,
+            'mf-section-1': null,
+            'mf-section-2': null,
+            'mf-section-3': null,
+            'mf-section-4': null,
+            'mw-default-size': 'ds',
+            'mw-file-description': 'fd',
+            'mw-halign-left': 'hal',
+            'mw-halign-right': 'har',
+            'mw-image-border': 'mib',
+            'navigation-not-searchable': null,
+            'open-block': null,
+            'pullquote': 'pq',
+            'quotebox': 'qb',
+            'section-heading': 'sh',
+            'mw-content-ltr': null,
+            'mw-highlight': 'hl',
+            'pcs-edit-section-header': null,
+        };
+
+        for (const c in classes) {
+            container.querySelectorAll('.'+c).forEach(e => {
+                e.classList.remove(c);
+                if (classes[c]) {
+                    e.classList.add(classes[c]);
+                }
+            });
+        }
 
         container.querySelectorAll('.pcs-edit-section-header').forEach(e => {
             e.outerHTML = e.innerHTML;
@@ -103,7 +200,7 @@ for (let i = 0; i < files.length; i++) {
         });
 
         container.querySelectorAll('header,section').forEach(e => {
-            e.outerHTML = e.innerHTML;
+            e.replaceWith(e.innerHTML);
         });
 
         container.querySelectorAll('a[href]').forEach(e => {

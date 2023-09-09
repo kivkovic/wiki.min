@@ -1,69 +1,50 @@
-const svgo = require('svgo');
+const sharp = require('sharp');
 const fs = require('fs');
 
-const files = fs.readdirSync('images').filter(f => f.match(/\.svg$/i));
+const files = fs.readdirSync('images');//.filter(f => !f.match(/\.svg$/i) && f.match(/\.(jpe?g|png|gif|webp|tiff?)$/i));
 
 let originalTotal = 0;
 let outputTotal = 0;
 
-for (let i = 0; i < files.length; i++) {
-    const name = files[i];
+const outdir = 'images-vector-converted/';
 
-    if (fs.existsSync('images-converted/' + name)) continue;
+(async function () {
 
-    console.log(name);
+    for (let i = 0; i < files.length; i++) {
 
-    let svg = fs.readFileSync('images/' + name).toString().replace(/\x00/g, '');
+        const nameIn = files[i];
+        if (!nameIn.match(/\.(jpe?g|png|gif|webp|tiff?|svg)$/i)) continue;
 
-    while (svg.charCodeAt(0) === 0xFFFF || svg.charCodeAt(0) === 0xFEFF || svg.charCodeAt(0) === 0xFFFD) {
-        svg = svg.slice(1);
-    }
+        const name = nameIn.replace(/(\.svg)?\.[a-z]{3,4}$/i, '');
 
-    /*if (svg.charCodeAt(0) === 0xFEFF || svg.charCodeAt(0) === 0xFFFF || svg.charCodeAt(0) == 0xFFFD) {
-        svg = svg.slice(1);
-    }
-    if (svg.charCodeAt(0) === 0xFEFF || svg.charCodeAt(0) === 0xFFFF || svg.charCodeAt(0) == 0xFFFD) {
-        svg = svg.slice(1);
-    }*/
+        if (fs.existsSync(outdir + name + '.webp')) continue;
 
-    //for (let j = 0; j < 10; j++) console.log(svg.charCodeAt(j));
+        console.log(i, '/', files.length);
 
-    try {
+        try {
 
-        const output = svgo.optimize(svg, {
-            multipass: true,
-            plugins: [
-                'removeOffCanvasPaths',
-                //'removeRasterImages',
-                'removeScriptElement',
-                //'removeXMLNS',
-                'reusePaths',
-                {
-                    name: 'preset-default',
-                    params: {
-                        overrides: {
-                            removeViewBox: false
-                        }
-                    }
-                }
-            ],
-        });
+            await sharp('images/' + nameIn)
+                .resize(640, 640, { fit: 'inside', withoutEnlargement: true })
+                .webp({ quality: 75 })
+                .toFile(outdir + name + '.webp');
 
-        fs.writeFileSync('images-converted/' + name, output.data);
+            //console.log(`input: ${Math.round(svg.length / 1024)}, output: ${Math.round(output.data.length / 1024)}, ratio: ${(output.data.length / svg.length).toFixed(2)}`)
 
-        console.log(`input: ${Math.round(svg.length / 1024)}, output: ${Math.round(output.data.length / 1024)}, ratio: ${(output.data.length / svg.length).toFixed(2)}`)
+            //originalTotal += svg.length / 1024 / 1024;
+            //outputTotal += output.data.length / 1024 / 1024;
 
-        originalTotal += svg.length / 1024 / 1024;
-        outputTotal += output.data.length / 1024 / 1024;
+            //if (i % 100 == 0) {
+            //    console.log('summary:', originalTotal, outputTotal);
+            //}
 
-        if (i % 1000 == 0) {
-            console.log('summary:', originalTotal, outputTotal);
+        } catch (e) {
+            console.log('ERROR', 'images/' + name)
+            console.log(e);
+            process.exit(1);
         }
-
-    } catch (e) {
-        console.log(e);
+        //break;
     }
-    //break;
-}
 
-console.log('summary:', originalTotal, outputTotal);
+})();
+
+//console.log('summary:', originalTotal, outputTotal);
