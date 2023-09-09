@@ -37,8 +37,7 @@ Object.keys(redirects).forEach(k => {
 
 let timeSum = 1;
 let count = 1;
-//const files = fs.readdirSync('./html');
-const files = ['Zadar.html'];
+const files = fs.readdirSync('./html');
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
