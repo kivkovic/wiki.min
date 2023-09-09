@@ -92,7 +92,16 @@
             return matches;
         }
 
+        window.addEventListener('hashchange', () => {
+            const title = window.location.hash.slice(1);
+            if (title) return loadPage(title + '.html');
+            document.querySelector('#content').innerHTML = '';
+        });
+
         async function loadPage(title, clearSearch = true) {
+
+            window.location.hash = title.replace(/\.html$/i, '');
+
             const container = document.querySelector('#content');
             container.innerHTML = '';
             const contentResponse = await fetch('./w/' + title);
@@ -107,11 +116,18 @@
                     return false;
                 });
             });
+
+            return false;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             const redirectsRequest = await fetch('./index/redirects.json');
             const redirects = await redirectsRequest.text();
+
+            const title = window.location.hash.slice(1);
+            if (title) {
+                loadPage(title + '.html');
+            }
 
             const searchResults = document.querySelector('#search-results');
 
@@ -123,7 +139,11 @@
                     m[1][0] = `<b>${m[1][0]}</b>`;
                     a.innerHTML = m[1].join(', ');
                     a.setAttribute('href', '#');
-                    a.addEventListener('click', () => loadPage(m[0]));
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        loadPage(m[0]);
+                        return false;
+                    });
                     searchResults.append(a);
                 }
             });
