@@ -616,6 +616,11 @@ div.mwh {
   flex-wrap: wrap;
 }
 
+.hlist li {
+  margin: 0;
+  display: inline;
+}
+
 figure {
   display: table;
 }
@@ -633,4 +638,37 @@ figcaption {
   line-height: 1.5;
   padding: 0 !important;
   color: #54595d;
+}
+
+.thumb {
+  margin: 0.6em 0;
+}
+
+.center {
+  width: 100%;
+  text-align: center;
+}
+
+.thumb .thumbinner {
+  margin: 0 auto;
+  max-width: 100% !important;
+}
+
+.tmulti .multiimageinner {
+  display: flex;
+  flex-direction: column;
+}
+
+.tmulti .trow {
+  display: flex;
+  flex-direction: row;
+  clear: left;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tmulti .tsingle {
+  margin: 1px;
+  float: left;
 }
