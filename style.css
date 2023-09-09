@@ -96,6 +96,7 @@ h4,
 h5,
 h6 {
   padding: 0.5em 0;
+  clear: left; /* TEST, maybe remove */
 }
 
 h1,
