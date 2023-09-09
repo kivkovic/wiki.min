@@ -672,3 +672,7 @@ figcaption {
   margin: 1px;
   float: left;
 }
+
+.ambox {
+  display: none !important;
+}
