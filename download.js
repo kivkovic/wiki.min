@@ -95,7 +95,7 @@ let consecutiveErrors = 0;
                 //process.exit(0)
                 */
 
-                Array.from(doc.querySelectorAll('section,div')).map(e => e.removeAttribute('style'));
+                //Array.from(doc.querySelectorAll('section,div')).map(e => e.removeAttribute('style'));
 
                 /*const links = new Set();
                 Array.from(doc.querySelectorAll('a')).map(e => e.getAttribute('href')).filter(s => s).map(url => {

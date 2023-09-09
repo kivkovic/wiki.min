@@ -94,6 +94,13 @@ for (let i = 0; i < files.length; i++) {
 
         const container = doc.querySelector('#pcs');
 
+        container.querySelectorAll('*[style]').forEach(e => {
+            const style = e.getAttribute('style');
+            if (style?.length) {
+                e.setAttribute('style', style.replace(/display: *none;?/,''));
+            }
+        });
+
         /*container.querySelectorAll('figure').forEach(e => {
             const src = e.querySelector('[data-src]')?.getAttribute('data-src');
             if (!src) {
@@ -165,7 +172,7 @@ for (let i = 0; i < files.length; i++) {
         const atts = [
             'data-mw-section-id',
             'about',
-            'style',
+            //'style',
             'title',
             'alt',
             'usemap',
@@ -196,11 +203,12 @@ for (let i = 0; i < files.length; i++) {
         });
 
         const classes = {
-            'category': 'cat',
+            'category': null,
+            'center-aligned': 'ca',
             'collapsible-block-js': null,
             'collapsible-block': null,
             'collapsible-heading': null,
-            'flagicon': 'fl',
+            'flagicon': null,
             'floatright': 'fr',
             'ib-settlement-caption-link': 'ibscl',
             'ib-settlement-cols-cell': 'ibscc',
@@ -213,7 +221,7 @@ for (let i = 0; i < files.length; i++) {
             'image-lazy-loaded': null,
             'infobox-above': 'iba',
             'infobox-below': 'ibb',
-            'infobox-caption': 'ibc',
+            'infobox-caption': null,
             'infobox-data': 'ibd',
             'infobox-full-data': 'ibfd',
             'infobox-header': 'ibh',
@@ -221,33 +229,37 @@ for (let i = 0; i < files.length; i++) {
             'infobox-label': 'ibl',
             'infobox-subheader': 'ibsh',
             'infobox': 'ib',
-            'maptable': 'mt',
-            'mergedrow': 'mr',
-            'mergedtoprow': 'mtr',
+            'left-aligned': 'la',
+            'maptable': null,
+            'mergedbottomrow': 'mtr',
+            'mergedrow': null,
+            'mergedtoprow': null,
             'mf-section-0': null,
             'mf-section-1': null,
             'mf-section-2': null,
             'mf-section-3': null,
             'mf-section-4': null,
-            'mw-collapsible': null,
             'mw-collapsible-content': null,
+            'mw-collapsible': null,
             'mw-content-ltr': null,
-            'mw-default-size': 'ds',
-            'mw-empty-elt': 'e',
-            'mw-file-description': 'fd',
-            'mw-file-element': 'fe',
+            'mw-default-size': null,
+            'mw-empty-elt': 'emp',
+            'mw-file-description': null,
+            'mw-file-element': null,
             'mw-halign-left': 'hal',
             'mw-halign-right': 'har',
-            'mw-highlight': 'hl',
-            'mw-image-border': 'mib',
-            'mw-page-title-main': 'tm',
+            'mw-highlight': 'mwh',
+            'mw-image-border': null,
+            'mw-page-title-main': null,
             'navigation-not-searchable': null,
-            'nickname': 'nn',
+            'nickname': null,
             'noexcerpt': null,
             'nopopups': null,
-            'notheme': 'nt',
+            'notheme': null,
             'nowrap': 'nw',
+            'nowraplinks': 'nwl',
             'open-block': null,
+            'plainlist': 'pl',
             'pcs-collapse-table-container': null,
             'pcs-collapse-table-content': null,
             'pcs-collapse-table': 'ct',
@@ -255,8 +267,10 @@ for (let i = 0; i < files.length; i++) {
             'pcs-edit-section-title': null,
             'pcs-header-inner-left': null,
             'pcs-header-inner-right': '',
-            'pullquote': 'pq',
+            'pullquote': null,
             'quotebox': 'qb',
+            'quotebox-title': 'qbt',
+            'right-aligned': 'ra',
             'rt-commentedText': 'ct',
             'section-heading': 'sh',
             'wikitable': 'wt',
@@ -295,9 +309,9 @@ for (let i = 0; i < files.length; i++) {
             e.removeAttribute('class');
         });
 
-        container.querySelectorAll('[style=""]').forEach(e => {
+        /*container.querySelectorAll('[style=""]').forEach(e => {
             e.removeAttribute('style');
-        });
+        });*/
 
         container.querySelectorAll('a[href]').forEach(e => {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
