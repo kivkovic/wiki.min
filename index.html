@@ -1,37 +1,142 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <style>
-             html {
-                margin: 0;
-                padding: 0;
-                width: 100vw;
-                height: 100vh;
+
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        dt {
+            font-weight: bold;
+            margin-bottom: 0.1em;
+        }
+
+        .monospaced {
+            font-family: monospace;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        #search {
+            width: 100%;
+            border-radius: 4px;
+            padding: 8px;
+            border: 1px solid #bbb;
+        }
+
+        #search-results a {
+            display: block;
+        }
+    </style>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+        function findMatches(source, string) {
+            const matches = [];
+            if (string.length <= 2) return matches;
+
+            let r = new RegExp(string, 'gi');
+            let m;
+            let i = 0;
+            let lastLineEnd = -1;
+
+            while ((m = r.exec(source)) !== null && i < 100) {
+                if (m.index < lastLineEnd) continue;
+
+                let lineStart = -1, lineEnd = -1;
+                for (let j = m.index; j > m.index - 1000; j--) {
+                    if (source[j] == '\n') {
+                        lineStart = j + 1;
+                        break;
+                    }
+                }
+                for (let j = m.index; j < m.index + 1000; j++) {
+                    if (source[j] == '\n') {
+                        lineEnd = j - 1;
+                        break;
+                    }
+                }
+                if (lineStart != -1 && lineEnd != -1) {
+                    try {
+                        const line = source.slice(lineStart, lineEnd);
+                        const content = line.match(/^("[^[]+"):(\[.*\]),?\s*$/);
+                        matches.push([JSON.parse(content[1]), JSON.parse(content[2])]);
+                        lastLineEnd = lineEnd;
+
+                    } catch (e) {
+                        console.log('parsing error', e);
+                    }
+                }
+                i++;
             }
-            body {
-                font-family: sans-serif;
-                margin: 0;
-                padding: 16px;
-            }
-            ul {
-                list-style: none;
-            }
-            dt {
-                font-weight: bold;
-                margin-bottom: 0.1em;
-            }
-            .monospaced {
-                font-family: monospace;
-            }
-        </style>
-        <link rel="stylesheet" href="style.css" />
-        <script>
-            document.addEventListener('DOMContentLoaded', async function () {
-                const contentResponse = await fetch('./w/Zadar.html');
-                const contentHTML = await contentResponse.text();
-                document.body.innerHTML = contentHTML;
+
+            return matches;
+        }
+
+        async function loadPage(title, clearSearch = true) {
+            const container = document.querySelector('#content');
+            container.innerHTML = '';
+            const contentResponse = await fetch('./w/' + title);
+            const contentHTML = await contentResponse.text();
+            container.innerHTML = contentHTML;
+            document.querySelector('#search-results').innerHTML = '';
+
+            document.querySelectorAll('#content a').forEach(a => {
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadPage(e.target.getAttribute('href'));
+                    return false;
+                });
             });
-        </script>
-    </head>
-    <body>
-    </body>
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const redirectsRequest = await fetch('./index/redirects.json');
+            const redirects = await redirectsRequest.text();
+
+            const searchResults = document.querySelector('#search-results');
+
+            document.querySelector('#search').addEventListener('input', e => {
+                const matches = findMatches(redirects, e.target.value);
+                searchResults.innerHTML = '';
+                for (const m of matches) {
+                    const a = document.createElement('a');
+                    m[1][0] = `<b>${m[1][0]}</b>`;
+                    a.innerHTML = m[1].join(', ');
+                    a.setAttribute('href', '#');
+                    a.addEventListener('click', () => loadPage(m[0]));
+                    searchResults.append(a);
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="search-container">
+        <input id="search" type="text" placeholder="Search" autocomplete="off" />
+        <div id="search-results"></div>
+    </div>
+    <div id="content"></div>
+</body>
+
 </html>
