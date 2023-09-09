@@ -6,7 +6,7 @@ const files = fs.readdirSync('images');//.filter(f => !f.match(/\.svg$/i) && f.m
 let originalTotal = 0;
 let outputTotal = 0;
 
-const outdir = 'images-vector-converted/';
+const outdir = 'i/';
 
 (async function () {
 
@@ -19,7 +19,7 @@ const outdir = 'images-vector-converted/';
 
         if (fs.existsSync(outdir + name + '.webp')) continue;
 
-        console.log(i, '/', files.length);
+        console.log(i, '/', files.length, name);
 
         try {
 

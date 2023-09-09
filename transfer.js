@@ -1,13 +1,37 @@
 const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
 
+const specialDecode = (s) => {
+    return (s
+        .replace(/%26/g, '&')
+        .replace(/%2A/g, '*')
+        .replace(/%2F/g, '/')
+        .replace(/%3A/g, ':')
+        .replace(/%3F/g, '?')
+    );
+};
+
+const specialEncode = (s) => {
+    return (s
+        .replace(/\&/g, '%26')
+        .replace(/\*/g, '%2A')
+        .replace(/\//g, '%2F')
+        .replace(/\:/g, '%3A')
+        .replace(/\?/g, '%3F')
+    );
+};
+
+const allEncode = (s) => {
+
+};
+
 const allTitles = new Set();
 const allTitlesReverse = new Map();
 const redirects = JSON.parse(fs.readFileSync('index/redirects.json').toString());
 Object.keys(redirects).forEach(k => {
     redirects[k].forEach(r => {
         allTitles.add(r.toLowerCase());
-        allTitlesReverse.set(r.toLowerCase(), k);
+        allTitlesReverse.set(specialEncode(r.toLowerCase()), k);
     });
 });
 
@@ -19,13 +43,19 @@ const files = ['Zadar.html'];
 const getimgsrc = (path) => {
     const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
     const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
-    const finalpath = 'i/' + mainanme + '.webp';
 
-    if (!fs.existsSync(finalpath)) {
-        return null;
+    const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
+    if (fs.existsSync(diskpath)) {
+        return 'i/' + encodeURIComponent(specialEncode(mainanme)) + '.webp';
     }
 
-    return encodeURIComponent(finalpath);
+    /*const finalpath2 = 'i/' + allEncode(mainanme) + '.webp';
+    if (fs.existsSync(finalpath2)) {
+        return finalpath2;
+    }*/
+
+    //console.log('img skip', mainanme);
+    return null;
 };
 
 const closestImgParent = (e, debug) => {
@@ -64,7 +94,7 @@ for (let i = 0; i < files.length; i++) {
 
         const container = doc.querySelector('#pcs');
 
-        container.querySelectorAll('figure').forEach(e => {
+        /*container.querySelectorAll('figure').forEach(e => {
             const src = e.querySelector('[data-src]')?.getAttribute('data-src');
             if (!src) {
                 e.remove();
@@ -81,6 +111,20 @@ for (let i = 0; i < files.length; i++) {
             }
 
             e.innerHTML = `<img src="${srclocal}" width="${width}" height="${height}" />`
+        });*/
+
+        container.querySelectorAll('[src]').forEach(e => {
+            const src = e.getAttribute('src');
+            const width = e.getAttribute('width');
+            const height = e.getAttribute('height');
+            const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
+
+            if (srclocal == null) {
+                closestImgParent(e, 1).remove();
+                return;
+            }
+
+            e.replaceWith(`<img src="${srclocal}" width="${width}" height="${height}" />`);
         });
 
         container.querySelectorAll('[data-src]').forEach(e => {
@@ -101,7 +145,7 @@ for (let i = 0; i < files.length; i++) {
             e.remove();
         });
 
-        container.querySelectorAll('[src]').forEach(e => {
+        /*container.querySelectorAll('[src]').forEach(e => {
             if (!e.getAttribute('resource')) {
                 // previously processed
                 return;
@@ -116,7 +160,7 @@ for (let i = 0; i < files.length; i++) {
 
             e.setAttribute('src', srclocal);
             e.removeAttribute('resource');
-        });
+        });*/
 
         const atts = [
             'data-mw-section-id',
@@ -133,6 +177,12 @@ for (let i = 0; i < files.length; i++) {
             'data-file-height',
             'data-file-type',
             'srcset',
+            'typeof',
+            'data-mw',
+            'data-description-source',
+            'data-wikdata-entity-id',
+            'id',
+            'data-id',
         ];
 
         for (const a of atts) {
@@ -146,16 +196,30 @@ for (let i = 0; i < files.length; i++) {
         });
 
         const classes = {
+            'category': 'cat',
             'collapsible-block-js': null,
             'collapsible-block': null,
             'collapsible-heading': null,
+            'flagicon': 'fl',
             'floatright': 'fr',
             'ib-settlement-caption-link': 'ibscl',
             'ib-settlement-cols-cell': 'ibscc',
             'ib-settlement-cols-row': 'ibscr',
+            'ib-settlement-cols': 'ibsc',
+            'ib-settlement-fn': 'ibsf',
+            'ib-settlement-official': 'ibso',
+            'ib-settlement-other-name': 'ibson',
+            'ib-settlement': 'ibs',
             'image-lazy-loaded': null,
+            'infobox-above': 'iba',
+            'infobox-below': 'ibb',
+            'infobox-caption': 'ibc',
+            'infobox-data': 'ibd',
             'infobox-full-data': 'ibfd',
+            'infobox-header': 'ibh',
             'infobox-image': 'ibi',
+            'infobox-label': 'ibl',
+            'infobox-subheader': 'ibsh',
             'infobox': 'ib',
             'maptable': 'mt',
             'mergedrow': 'mr',
@@ -165,19 +229,37 @@ for (let i = 0; i < files.length; i++) {
             'mf-section-2': null,
             'mf-section-3': null,
             'mf-section-4': null,
+            'mw-collapsible': null,
+            'mw-collapsible-content': null,
+            'mw-content-ltr': null,
             'mw-default-size': 'ds',
+            'mw-empty-elt': 'e',
             'mw-file-description': 'fd',
+            'mw-file-element': 'fe',
             'mw-halign-left': 'hal',
             'mw-halign-right': 'har',
+            'mw-highlight': 'hl',
             'mw-image-border': 'mib',
+            'mw-page-title-main': 'tm',
             'navigation-not-searchable': null,
+            'nickname': 'nn',
+            'noexcerpt': null,
+            'nopopups': null,
+            'notheme': 'nt',
+            'nowrap': 'nw',
             'open-block': null,
+            'pcs-collapse-table-container': null,
+            'pcs-collapse-table-content': null,
+            'pcs-collapse-table': 'ct',
+            'pcs-edit-section-header': null,
+            'pcs-edit-section-title': null,
+            'pcs-header-inner-left': null,
+            'pcs-header-inner-right': '',
             'pullquote': 'pq',
             'quotebox': 'qb',
+            'rt-commentedText': 'ct',
             'section-heading': 'sh',
-            'mw-content-ltr': null,
-            'mw-highlight': 'hl',
-            'pcs-edit-section-header': null,
+            'wikitable': 'wt',
         };
 
         for (const c in classes) {
@@ -203,9 +285,23 @@ for (let i = 0; i < files.length; i++) {
             e.replaceWith(e.innerHTML);
         });
 
+        container.querySelectorAll('span').forEach(e => {
+            if (e.innerHTML.trim().length == 0) {
+                e.replaceWith('');
+            }
+        })
+
+        container.querySelectorAll('[class=""]').forEach(e => {
+            e.removeAttribute('class');
+        });
+
+        container.querySelectorAll('[style=""]').forEach(e => {
+            e.removeAttribute('style');
+        });
+
         container.querySelectorAll('a[href]').forEach(e => {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
-            const title = href.replace(/#.*$/, '').toLowerCase();
+            const title = specialEncode(href.replace(/#.*$/, '').toLowerCase());
 
             if (allTitles.has(title)) {
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
