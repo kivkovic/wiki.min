@@ -2,7 +2,7 @@ function findMatches(source, string) {
     const matches = [];
     if (string.length <= 2) return matches;
 
-    let r = new RegExp(string, 'gi');
+    let r = new RegExp(string.trim(), 'gi');
     let m;
     let i = 0;
     let lastLineEnd = -1;
@@ -27,9 +27,14 @@ function findMatches(source, string) {
             try {
                 const line = source.slice(lineStart, lineEnd);
                 const content = line.match(/^("[^[]+"):(\[.*\]),?\s*$/);
+
+                const titles = JSON.parse(content[2])
+                    .filter((v,i,a) => i == 0 || v.toLowerCase().replace(/[^a-z0-9.\-]/gi, '') != a[0].toLowerCase().replace(/[^a-z0-9.\-]/gi, ''))
+                    .map(v => v.trim());
+
                 matches.push([
                     JSON.parse(content[1]), // file target
-                    JSON.parse(content[2]), // title matches
+                    titles, // title matches
                     source[m.index - 1] == '"', // is match start of word
                     m.index - lineStart // distance of match from line start
                 ]);
