@@ -92,8 +92,8 @@ for (const k in redirects) {
 let timeSum = 1;
 let count = 1;
 
-//const files = fs.readdirSync('./html');
-const files = ['Tesseract.html'];
+const files = fs.readdirSync('./html');
+//const files = ['Diophantine equation.html'];
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
@@ -435,21 +435,21 @@ for (let i = 0; i < files.length; i++) {
                 e.setAttribute('href', realHref + hash);
 
             } else {
+                let title2 = specialDecode(title);
                 try {
-                    const title2 = decodeURIComponent(title);
-                    if (allTitles.has(title2)) {
-                        const hash = (href.match(/(#.+)$/) || [])[1] || '';
-                        const realHref = allTitlesReverse.get(title2).replace(/\.html$/,'');
-                        e.setAttribute('href', realHref + hash);
-                    }
-                    return;
+                    title2 = decodeURIComponent(title);
                 } catch (e) { }
+
+                if (title2 && allTitles.has(title2)) {
+                    const hash = (href.match(/(#.+)$/) || [])[1] || '';
+                    const realHref = (allTitlesReverse.get(title2) ?? allTitlesReverse.get(specialEncode(title2))).replace(/\.html$/,'');
+                    e.setAttribute('href', realHref + hash);
+                }
 
                 const title3 = e.innerHTML.trim().toLowerCase();
                 if (allTitles.has(title3)) {
                     e.setAttribute('href', title3);
                 } else {
-                    //console.log(title);
                     e.replaceWith(e.innerHTML);
                 }
 
