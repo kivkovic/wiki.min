@@ -54,7 +54,7 @@ function findMatches(source, string) {
 
     for (const match of matchesTop) {
 
-        const titles = [match[0].replace(/\.html$/,'')].concat(match[1]).map(s => s.trim());
+        const titles = [match[0].replace(/\.html$/,'')].concat(match[1]).map(s => specialDecode(s.trim()));
         const titles_pruned = [];
 
         /*
@@ -114,7 +114,7 @@ async function loadPage(linkInput, clearSearch = true) {
         return;
     }
 
-    const parts = linkInput.match(/^(.+)(?:\.html)?(?:#(.+))?$/);
+    const parts = linkInput.match(/^(?:\.\/)?(.+?)(?:#(.+))?$/);
     const title = parts[1];
     const section = parts[2];
 
@@ -127,7 +127,7 @@ async function loadPage(linkInput, clearSearch = true) {
 
     container.innerHTML = '';
 
-    const contentResponse = await fetch('./w/' + title + '.html');
+    const contentResponse = await fetch('./w/' + specialEncode(decodeURIComponent(title)).replace(/%/g,'%25') + '.html');
     const contentHTML = await contentResponse.text();
     container.innerHTML = contentHTML;
     document.querySelector('#search-results').innerHTML = '';
@@ -283,3 +283,23 @@ function levenshtein_dist(_a, _b, case_sensitive = false) {
 
     return dd;
 }
+
+function specialDecode(s) {
+    return (s
+        .replace(/%26/g, '&')
+        .replace(/%2A/g, '*')
+        .replace(/%2F/g, '/')
+        .replace(/%3A/g, ':')
+        .replace(/%3F/g, '?')
+    );
+};
+
+function specialEncode(s) {
+    return (s
+        .replace(/\&/g, '%26')
+        .replace(/\*/g, '%2A')
+        .replace(/\//g, '%2F')
+        .replace(/\:/g, '%3A')
+        .replace(/\?/g, '%3F')
+    );
+};
