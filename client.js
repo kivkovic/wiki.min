@@ -105,6 +105,15 @@ function jumpToSection(name) {
 
 async function loadPage(linkInput, clearSearch = true) {
 
+    const container = document.querySelector('#content');
+
+    if (!linkInput) {
+        window.location.hash = '';
+        loadedTitle = '';
+        container.innerHTML = '';
+        return;
+    }
+
     const parts = linkInput.match(/^(.+)(?:\.html)?(?:#(.+))?$/);
     const title = parts[1];
     const section = parts[2];
@@ -116,8 +125,8 @@ async function loadPage(linkInput, clearSearch = true) {
     window.location.hash = title;
     loadedTitle = decodeURIComponent(title);
 
-    const container = document.querySelector('#content');
     container.innerHTML = '';
+
     const contentResponse = await fetch('./w/' + title + '.html');
     const contentHTML = await contentResponse.text();
     container.innerHTML = contentHTML;
@@ -129,7 +138,6 @@ async function loadPage(linkInput, clearSearch = true) {
         document.title = document.querySelector('h1').innerText;
     } catch { }
 
-    document.querySelector('#index').style.display = 'none';
     document.querySelector('#search').value = '';
 
     return false;
@@ -149,12 +157,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const redirectsRequest = await fetch('./search-index.json');
     const redirects = await redirectsRequest.text();
 
-    const indexBlock = document.querySelector('#index');
     const title = window.location.hash.slice(1);
     if (title) {
         loadPage(title);
     } else {
-        indexBlock.style.display = '';
+        //loadPage('index');
+        loadPage();
     }
 
     const searchResults = document.querySelector('#search-results');
@@ -179,7 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelector('#back-to-index').addEventListener('click', (e) => {
         document.querySelector('#content').innerHTML = '';
-        indexBlock.style.display = '';
         document.title = 'Wikipedia';
     });
 
