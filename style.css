@@ -90,12 +90,18 @@ li {
   margin: 0 0 0.6em 0.6em;
 }
 
+.fl {
+  clear: left;
+  float: left;
+  margin: 0 0.6em 0.6em 0;
+}
+
 h2,
 h3,
 h4,
 h5,
 h6 {
-  padding: 0.5em 0;
+  padding: 0.25em 0;
   clear: left; /* TEST, maybe remove */
 }
 
@@ -108,6 +114,11 @@ h6 {
   line-height: 1.3;
   word-wrap: break-word;
   word-break: break-word;
+}
+
+h1, h2, h3 {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
 }
 
 .sh {
