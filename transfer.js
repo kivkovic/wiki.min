@@ -385,7 +385,7 @@ for (let i = 0; i < files.length; i++) {
             'pcs-edit-section-header': null,
             'pcs-edit-section-title': null,
             'pcs-header-inner-left': null,
-            'pcs-header-inner-right': '',
+            'pcs-header-inner-right': null,
             'pullquote': null,
             'quotebox': 'qb',
             'quotebox-title': 'qbt',
@@ -394,6 +394,8 @@ for (let i = 0; i < files.length; i++) {
             'section-heading': 'sh',
             'wikitable': 'wt',
             'pcs-widen-image-ancestor': null,
+            'mwe-math-mathml-inline': null,
+            'mwe-math-mathml-a11y': null,
         };
 
         for (const c in classes) {
