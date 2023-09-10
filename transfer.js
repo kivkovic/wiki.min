@@ -429,7 +429,7 @@ for (let i = 0; i < files.length; i++) {
 
             if (allTitles.has(title)) {
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
-                const realHref = allTitlesReverse.get(title); // already includes extension
+                const realHref = allTitlesReverse.get(title).replace(/\.html$/,'');
                 e.setAttribute('href', realHref + hash);
 
             } else {
@@ -437,7 +437,7 @@ for (let i = 0; i < files.length; i++) {
                     const title2 = decodeURIComponent(title);
                     if (allTitles.has(title2)) {
                         const hash = (href.match(/(#.+)$/) || [])[1] || '';
-                        const realHref = allTitlesReverse.get(title2); // already includes extension
+                        const realHref = allTitlesReverse.get(title2).replace(/\.html$/,'');
                         e.setAttribute('href', realHref + hash);
                     }
                     return;
@@ -445,7 +445,7 @@ for (let i = 0; i < files.length; i++) {
 
                 const title3 = e.innerHTML.trim().toLowerCase();
                 if (allTitles.has(title3)) {
-                    e.setAttribute('href', title3 + '.html');
+                    e.setAttribute('href', title3);
                 } else {
                     //console.log(title);
                     e.replaceWith(e.innerHTML);

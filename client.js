@@ -31,7 +31,7 @@ function findMatches(source, string) {
                 const content = line.match(/^("[^[]+"):(\[.*\]),?\s*$/);
 
                 matches.push([
-                    JSON.parse(content[1]) + '.html', // file target
+                    JSON.parse(content[1]), // file target
                     JSON.parse(content[2]), // title matches
                     source[m.index - 1] == '"', // is match start of word
                     m.index - lineStart // distance of match from line start
@@ -84,7 +84,7 @@ function findMatches(source, string) {
 
 window.addEventListener('hashchange', () => {
     const title = window.location.hash.slice(1);
-    if (title) return loadPage(title + '.html');
+    if (title) return loadPage(title);
     document.querySelector('#content').innerHTML = '';
 });
 
@@ -105,7 +105,7 @@ function jumpToSection(name) {
 
 async function loadPage(linkInput, clearSearch = true) {
 
-    const parts = linkInput.match(/^(.+)\.html(?:#(.+))?$/);
+    const parts = linkInput.match(/^(.+)(?:\.html)?(?:#(.+))?$/);
     const title = parts[1];
     const section = parts[2];
 
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const indexBlock = document.querySelector('#index');
     const title = window.location.hash.slice(1);
     if (title) {
-        loadPage(title + '.html');
+        loadPage(title);
     } else {
         indexBlock.style.display = '';
     }
