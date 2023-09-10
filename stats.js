@@ -1,12 +1,12 @@
 const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
 
-//const stats_images = fs.openSync('index/images.json', 'w');
-//const stats_links = fs.openSync('index/links.json', 'w');
+const stats_images = fs.openSync('index/images.json', 'w');
+const stats_links = fs.openSync('index/links.json', 'w');
 const stats_redirects = fs.openSync('index/redirects.json', 'w');
 
-//fs.writeFileSync(stats_images, '{\n');
-//fs.writeFileSync(stats_links, '{\n');
+fs.writeFileSync(stats_images, '{\n');
+fs.writeFileSync(stats_links, '{\n');
 fs.writeFileSync(stats_redirects, '{\n');
 
 let timeSum = 1;
@@ -15,6 +15,8 @@ const files = fs.readdirSync('./html');
 
 const images_all = {};
 const links_all = {};
+
+let comma = false;
 
 for (let i = 0; i < files.length; i++) {
     const f = files[i];
@@ -35,17 +37,17 @@ for (let i = 0; i < files.length; i++) {
         const title = doc.querySelector('title').innerHTML.trim().replace(/\&lt;/g,'<').replace(/\&gt;/g,'>').replace(/<\/?i>/g,'');
         const redirects1 = Array.from(doc.querySelectorAll('meta[redirect]'))
             .map(e => e.getAttribute('redirect'))
-            .filter(r => !r.match(/^(Category|Countries|Draft|Icons|Wikipedia talk|KanjiReference|Status|Talk|Template|User|Wikipedia|UN\/LOCODE|ISO 639|ISO 3166-1|ISO 15924):/i));
+            .filter(r => !r.match(/^(Category|Draft|Wikipedia talk|KanjiReference|Status|Talk|Template|User|Wikipedia|UN\/LOCODE|ISO 639|ISO 3166-1|ISO 15924):/i));
 
         const redirectsLC = redirects1.map(r => r.toLowerCase());
         const redirects2 = redirects1.filter((v,i,a) => redirectsLC.indexOf(v.toLowerCase()) == i);
 
-        const list = JSON.stringify({ [f]: [title].concat(redirects2) }).slice(1,-1);
-        fs.writeFileSync(stats_redirects, list + ',\n');
+        //const redirects3 = redirects2.filter(r => r.toLowerCase().replace(/[^a-z0-9.\-]/gi, '') != title.toLowerCase().replace(/[^a-z0-9.\-]/gi, ''));
 
-        //////// temp short-circuit to skip images
-        fs.closeSync(t);///////////////
-        continue;//////////////////////
+        const list = JSON.stringify({ [f]: [title].concat(redirects2) }).slice(1,-1);
+        fs.writeFileSync(stats_redirects, (comma ? ',' : '') + '\n' + list);
+
+        if (!comma) comma = true;
 
         doc.querySelectorAll('img').forEach((e,i) => {
             const src = e.getAttribute('src');
@@ -106,9 +108,9 @@ for (let i = 0; i < files.length; i++) {
 }
 
 fs.writeFileSync(stats_redirects, '\n}');
-//fs.writeFileSync(stats_images, Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
-//fs.writeFileSync(stats_links, Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+fs.writeFileSync(stats_images, Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+fs.writeFileSync(stats_links, Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
 
-//fs.closeSync(stats_images);
-//fs.closeSync(stats_links);
+fs.closeSync(stats_images);
+fs.closeSync(stats_links);
 fs.closeSync(stats_redirects);
