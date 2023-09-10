@@ -58,6 +58,19 @@ window.addEventListener('hashchange', () => {
 
 var loadedTitle;
 
+function jumpToSection(name) {
+    if (name) {
+        const subtitles = Array.from(document.querySelectorAll('h1,h2,h3,h4'));
+        for (const t of subtitles) {
+            if (t.innerText.trim().toLowerCase() == name.toLowerCase()) {
+                t.scrollIntoView();
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
 async function loadPage(linkInput, clearSearch = true) {
 
     const parts = linkInput.match(/^(.+)\.html(?:#(.+))?$/);
@@ -65,16 +78,7 @@ async function loadPage(linkInput, clearSearch = true) {
     const section = parts[2];
 
     if (loadedTitle == title) {
-        if (section) {
-            const subtitles = Array.from(document.querySelectorAll('h1,h2,h3,h4'));
-            for (const t of subtitles) {
-                if (t.innerText.trim().toLowerCase() == section.toLowerCase()) {
-                    t.scrollIntoView();
-                    return false;
-                }
-            }
-        }
-        return false;
+        return jumpToSection(section);
     }
 
     window.location.hash = title;
@@ -115,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelector('#search').addEventListener('input', e => {
         const matches = findMatches(redirects, e.target.value);
-        console.log(matches)
+
         searchResults.innerHTML = '';
         for (const m of matches) {
             const a = document.createElement('a');
