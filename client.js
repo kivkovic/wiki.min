@@ -2,12 +2,14 @@ function findMatches(source, string) {
     const matches = [];
     if (string.length <= 2) return matches;
 
-    let r = new RegExp(string.trim(), 'gi');
+    const safeString = string.trim().replace(/([\(\)\[\]\.\+\*\?\&\|\/\\])/gi, '\\$1');
+
+    let r = new RegExp(safeString, 'gi');
     let m;
     let i = 0;
     let lastLineEnd = -1;
 
-    while ((m = r.exec(source)) !== null && i < 100) {
+    while ((m = r.exec(source)) !== null && i < 1000) {
         if (m.index < lastLineEnd) continue;
 
         let lineStart = -1, lineEnd = -1;
@@ -52,7 +54,7 @@ function findMatches(source, string) {
         if (!a[2] && b[2]) return 1;
         if (a[3] != b[3]) return a[3] - b[3];
         return a[1][0].length - b[1][0].length;
-    });
+    }).slice(0,20);
 }
 
 window.addEventListener('hashchange', () => {
