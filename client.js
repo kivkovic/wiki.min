@@ -56,13 +56,33 @@ window.addEventListener('hashchange', () => {
     document.querySelector('#content').innerHTML = '';
 });
 
-async function loadPage(title, clearSearch = true) {
+var loadedTitle;
 
-    window.location.hash = title.replace(/\.html$/i, '');
+async function loadPage(linkInput, clearSearch = true) {
+
+    const parts = linkInput.match(/^(.+)\.html(?:#(.+))?$/);
+    const title = parts[1];
+    const section = parts[2];
+
+    if (loadedTitle == title) {
+        if (section) {
+            const subtitles = Array.from(document.querySelectorAll('h1,h2,h3,h4'));
+            for (const t of subtitles) {
+                if (t.innerText.trim().toLowerCase() == section.toLowerCase()) {
+                    t.scrollIntoView();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    window.location.hash = title;
+    loadedTitle = decodeURIComponent(title);
 
     const container = document.querySelector('#content');
     container.innerHTML = '';
-    const contentResponse = await fetch('./w/' + title);
+    const contentResponse = await fetch('./w/' + title + '.html');
     const contentHTML = await contentResponse.text();
     container.innerHTML = contentHTML;
     document.querySelector('#search-results').innerHTML = '';
