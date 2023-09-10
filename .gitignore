@@ -1,5 +1,6 @@
 node_modules
-index/*
+index/*.json
+index/images-*
 html/*
 images/*
 images-converted/*
