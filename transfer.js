@@ -92,8 +92,8 @@ for (const k in redirects) {
 let timeSum = 1;
 let count = 1;
 
-const files = fs.readdirSync('./html');
-//const files = ['Zadar.html'];
+//const files = fs.readdirSync('./html');
+const files = ['Tesseract.html'];
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
@@ -212,7 +212,8 @@ for (let i = 0; i < files.length; i++) {
                 figure.classList.add('hal');
             }
 
-            e.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
+            const target = e.parentNode.tagName == 'A' ? e.parentNode : e;
+            target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
         container.querySelectorAll('[data-src]').forEach(e => {
@@ -242,10 +243,11 @@ for (let i = 0; i < files.length; i++) {
                 figure.classList.add('hal');
             }
 
-            e.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
+            const target = e.parentNode.tagName == 'A' ? e.parentNode : e;
+            target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
-        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution').forEach(e => {
+        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution,.sistersitebox').forEach(e => {
             e.remove();
         });
 
