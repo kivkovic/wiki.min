@@ -39,7 +39,7 @@ let timeSum = 1;
 let count = 1;
 
 const files = fs.readdirSync('./html');
-//const files = ['Denmark.html'];
+//const files = ['Bohemian Rhapsody.html'];
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
@@ -215,6 +215,13 @@ for (let i = 0; i < files.length; i++) {
             e.removeAttribute('resource');
         });*/
 
+        container.querySelectorAll('.pcs-edit-section-title').forEach((e,i) => {
+            //console.log(e.innerText.trim())
+            if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|General References|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i)) {
+                e.closest('section')?.remove();
+            }
+        });
+
         const atts = [
             'data-mw-section-id',
             'about',
@@ -255,6 +262,7 @@ for (let i = 0; i < files.length; i++) {
             'collapsible-block': null,
             'collapsible-heading': null,
             'flagicon': null,
+            'floatleft': 'fl',
             'floatright': 'fr',
             'ib-settlement-caption-link': 'ibscl',
             'ib-settlement-cols-cell': 'ibscc',
@@ -332,17 +340,7 @@ for (let i = 0; i < files.length; i++) {
             });
         }
 
-        container.querySelectorAll('.pcs-edit-section-header').forEach(e => {
-            e.outerHTML = e.innerHTML;
-        });
-
-        container.querySelectorAll('.pcs-edit-section-title').forEach((e,i) => {
-            if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i)) {
-                e.closest('section')?.remove();
-            }
-        });
-
-        container.querySelectorAll('header,section').forEach(e => {
+        container.querySelectorAll('.pcs-edit-section-header,header,section').forEach(e => {
             e.replaceWith(e.innerHTML);
         });
 
