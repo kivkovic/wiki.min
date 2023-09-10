@@ -54,6 +54,14 @@ li {
   display: none;
 }
 
+.wt, .wt > tbody > tr > td, .wt > tbody > tr > th {
+  border: 1px solid rgba(84,89,93,0.3);
+}
+
+.wt > tbody > tr > td, .wt > tbody > tr > th {
+  padding: 4px 6px;
+}
+
 .wt>tr>th,
 .wt>*>tr>th {
   background-color: #eaecf0;
@@ -233,10 +241,6 @@ h1, h2, h3 {
 table {
   border-collapse: collapse;
   margin: 1em 0;
-}
-
-.wt {
-  border: 1px solid #54595d;
 }
 
 @media (min-width: 720px) {
