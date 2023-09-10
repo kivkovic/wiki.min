@@ -21,27 +21,82 @@ const specialEncode = (s) => {
     );
 };
 
-const allEncode = (s) => {
-
-};
-
 const allTitles = new Set();
 const allTitlesReverse = new Map();
 const redirects = JSON.parse(fs.readFileSync('index/redirects.json').toString());
+
+const skip_dup = new Set();
+
 Object.keys(redirects).forEach(k => {
     redirects[k].forEach(r => {
+        if (!r.length) {
+            return;
+        }
+
         allTitles.add(r.toLowerCase());
-        allTitlesReverse.set(specialEncode(r.toLowerCase()), k);
+        const t = specialEncode(r.toLowerCase());
+        if (allTitlesReverse.has(t)) {
+            const k2 = allTitlesReverse.get(t);
+            if (k2 != k) {
+
+                const r1 = JSON.stringify(redirects[k].sort().map(s => s.toLowerCase().trim()));
+                const r2 = JSON.stringify(redirects[k2].sort().map(s => s.toLowerCase().trim()));
+
+                if (r1 == r2) {
+
+                    const first = redirects[k][0].trim();
+                    const kt1 = k.replace(/\.html$/, '').trim();
+                    const kt2 = k2.replace(/\.html$/, '').trim();
+
+                    if (kt1 == first && kt2 != first) {
+                        skip_dup.add(k2);
+                    } else if (kt2 == first && kt1 != first) {
+                        skip_dup.add(k);
+                    } else if (kt1.indexOf(first) == 0 && kt2.indexOf(first) != 0) {
+                        skip_dup.add(k2);
+                    } else if (kt2.indexOf(first) == 0 && kt1.indexOf(first) != 0) {
+                        skip_dup.add(k);
+                    } else {
+                        const i1 = redirects[k].map(s => s.toLowerCase()).indexOf(kt1.toLowerCase());
+                        const i2 = redirects[k].map(s => s.toLowerCase()).indexOf(kt2.toLowerCase());
+                        if (i1 == -1 && i2 == -1) {
+                            if (kt1.length < kt2.length) {
+                                skip_dup.add(k2);
+                            } else {
+                                skip_dup.add(k);
+                            }
+                        } else if (i1 > -1 && i2 == -1) {
+                            skip_dup.add(k2);
+                        } else if (i1 == -1 && i2 > -1) {
+                            skip_dup.add(k);
+                        } else if (i1 < i2) {
+                            skip_dup.add(k2);
+                        } else if (i1 > i2) {
+                            skip_dup.add(k);
+                        }
+                    }
+                }
+            }
+        }
+        allTitlesReverse.set(t, k);
     });
 });
+
+for (const k in redirects) {
+    const def = k.replace(/\.html$/, '');
+    if (redirects[k].indexOf(def) == -1) {
+        redirects[k].unshift(def);
+    }
+}
 
 let timeSum = 1;
 let count = 1;
 
 const files = fs.readdirSync('./html');
+//const files = ['Zadar.html'];
 
 const getimgsrc = (path) => {
-    const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
+    const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
     const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
 
     const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
@@ -76,13 +131,22 @@ const closestImgParent = (e, debug) => {
     return e;
 };
 
+let dups = 0;
+
 for (let i = 0; i < files.length; i++) {
     const f = files[i];
     //if (i > 1000) break;
 
     if (!f.match(/\.html$/)) continue;
+
+    if (skip_dup.has(f)) {
+        delete redirects[f];
+        dups++;
+        continue;
+    }
+
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${f}, ${i+1}/${files.length}, ETA ${rem}h`)
+    console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
 
     const start = +new Date();
 
@@ -103,7 +167,7 @@ for (let i = 0; i < files.length; i++) {
         container.querySelectorAll('*[style]').forEach(e => {
             const style = e.getAttribute('style');
             if (style?.length) {
-                e.setAttribute('style', style.replace(/display: *none;?/,''));
+                e.setAttribute('style', style.replace(/display: *none;?/, ''));
             }
         });
 
@@ -214,7 +278,7 @@ for (let i = 0; i < files.length; i++) {
             e.removeAttribute('resource');
         });*/
 
-        container.querySelectorAll('.pcs-edit-section-title').forEach((e,i) => {
+        container.querySelectorAll('.pcs-edit-section-title').forEach((e, i) => {
             //console.log(e.innerText.trim())
             if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|General References|(Notes|References|Sources|Citations) and (notes|references|sources|citations|further reading)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)( .+)?|Map gallery|Notes( and (citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns – sister cities)$/i)) {
                 e.closest('section')?.remove();
@@ -245,7 +309,7 @@ for (let i = 0; i < files.length; i++) {
         ];
 
         for (const a of atts) {
-            container.querySelectorAll('['+a+']').forEach(e => {
+            container.querySelectorAll('[' + a + ']').forEach(e => {
                 e.removeAttribute(a);
             });
         }
@@ -331,7 +395,7 @@ for (let i = 0; i < files.length; i++) {
         };
 
         for (const c in classes) {
-            container.querySelectorAll('.'+c).forEach(e => {
+            container.querySelectorAll('.' + c).forEach(e => {
                 e.classList.remove(c);
                 if (classes[c]) {
                     e.classList.add(classes[c]);
@@ -359,19 +423,32 @@ for (let i = 0; i < files.length; i++) {
 
         container.querySelectorAll('a[href]').forEach(e => {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
-            const title = specialEncode(href.replace(/#.*$/, '').toLowerCase());
+            const title = specialEncode(href.replace(/#.*$/, '').toLowerCase()).replace(/\.html$/, '');
 
             if (allTitles.has(title)) {
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
                 const realHref = allTitlesReverse.get(title); // already includes extension
                 e.setAttribute('href', realHref + hash);
-            } else { // guess fallback based on text
-                const title2 = e.innerHTML.toLowerCase();
-                if (allTitles.has(title2)) {
-                    e.setAttribute('href', title2 + '.html');
+
+            } else {
+                try {
+                    const title2 = decodeURIComponent(title);
+                    if (allTitles.has(title2)) {
+                        const hash = (href.match(/(#.+)$/) || [])[1] || '';
+                        const realHref = allTitlesReverse.get(title2); // already includes extension
+                        e.setAttribute('href', realHref + hash);
+                    }
+                    return;
+                } catch (e) { }
+
+                const title3 = e.innerHTML.trim().toLowerCase();
+                if (allTitles.has(title3)) {
+                    e.setAttribute('href', title3 + '.html');
                 } else {
+                    //console.log(title);
                     e.replaceWith(e.innerHTML);
                 }
+
             }
         });
 
@@ -393,3 +470,13 @@ for (let i = 0; i < files.length; i++) {
     count++;
 
 }
+
+console.log('Skipped duplicates:', dups);
+
+const search_index = fs.openSync('search-index.json', 'w');
+fs.writeFileSync(search_index, '{\n');
+const keys = Object.keys(redirects);
+for (let i = 0; i < keys.length; i++) {
+    fs.writeFileSync(search_index, JSON.stringify({ [keys[i].replace(/\.html$/,'')]: redirects[keys[i]] }).slice(1,-1) + (i < keys.length - 1 ? ',' : '') + '\n');
+}
+fs.writeFileSync(search_index, '\n}');
