@@ -677,3 +677,33 @@ figcaption {
 .ambox {
   display: none !important;
 }
+
+ul.gallery {
+  margin: 2px;
+  padding: 2px;
+  display: block;
+}
+
+.center > *, .center .thumb {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+li.gallerybox {
+  vertical-align: top;
+  display: inline-block;
+}
+
+.gallerytext {
+  overflow: hidden;
+  font-size: 94%;
+  padding: 2px 4px;
+  word-wrap: break-word;
+}
+
+.thumbcaption {
+  margin: 0.5em 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0 !important;
+}

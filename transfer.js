@@ -38,8 +38,8 @@ Object.keys(redirects).forEach(k => {
 let timeSum = 1;
 let count = 1;
 
-//const files = fs.readdirSync('./html');
-const files = ['Denmark.html'];
+const files = fs.readdirSync('./html');
+//const files = ['Denmark.html'];
 
 const getimgsrc = (path) => {
     const basename = path.length >= 250? path.slice(0,245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
@@ -66,6 +66,8 @@ const closestImgParent = (e, debug) => {
     if (closestFigure) return closestFigure;
     const tsingle = e.closest('.tsingle');
     if (tsingle) return tsingle;
+    const gallerybox = e.closest('.gallerybox');
+    if (gallerybox) return gallerybox;
     const thumbcaption = e.closest('.thumbcaption');
     if (thumbcaption) return thumbcaption;
     const closestCell = e.closest('.ib-settlement-cols-cell');
@@ -168,7 +170,12 @@ for (let i = 0; i < files.length; i++) {
             }
 
             const figure = e.closest('figure');
-            if (figure && !figure.classList.contains('mw-halign-left') && !figure.classList.contains('mw-halign-right')) {
+            if (figure
+                && !figure.classList.contains('mw-halign-left')
+                && !figure.classList.contains('mw-halign-right')
+                && !figure.classList.contains('har')
+                && !figure.classList.contains('hal')
+            ) {
                 figure.classList.add('hal');
             }
 
