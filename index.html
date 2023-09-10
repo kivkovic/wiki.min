@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <title>Wikipedia</title>
     <style>
         * {
             box-sizing: border-box;
@@ -38,14 +39,24 @@
         }
 
         #search {
-            width: 100%;
+            flex: 1 1 100%;
             border-radius: 4px;
             padding: 8px;
             border: 1px solid #bbb;
-            margin-bottom: 8px;
         }
 
         #search-results a {
+            display: block;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-row a {
+            flex: 1 1 80px;
             display: block;
         }
     </style>
@@ -55,10 +66,17 @@
 
 <body>
     <div class="search-container">
-        <input id="search" type="text" placeholder="Search" autocomplete="off" />
+        <div class="search-row">
+            <a href="#" id="back-to-index">&laquo; Index</a>
+            <input id="search" type="text" placeholder="Search" autocomplete="off" />
+        </div>
         <div id="search-results"></div>
     </div>
     <div id="content"></div>
+    <div id="index" style="display:none;">
+        <h2>Core Topics Index</h2>
+
+    </div>
 </body>
 
 </html>

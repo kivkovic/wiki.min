@@ -96,28 +96,38 @@ async function loadPage(linkInput, clearSearch = true) {
     container.innerHTML = contentHTML;
     document.querySelector('#search-results').innerHTML = '';
 
-    document.querySelectorAll('#content a').forEach(a => {
+    setLinks(document.querySelectorAll('#content a'));
+
+    try {
+        document.title = document.querySelector('h1').innerText;
+    } catch { }
+
+    document.querySelector('#index').style.display = 'none';
+    document.querySelector('#search').value = '';
+
+    return false;
+}
+
+function setLinks(elements) {
+    elements.forEach(a => {
         a.addEventListener('click', (e) => {
             e.preventDefault();
             loadPage(e.target.getAttribute('href'));
             return false;
         });
     });
-
-    try {
-        document.title = document.querySelector('h1').innerText;
-    } catch { }
-
-    return false;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     const redirectsRequest = await fetch('./index/redirects.json');
     const redirects = await redirectsRequest.text();
 
+    const indexBlock = document.querySelector('#index');
     const title = window.location.hash.slice(1);
     if (title) {
         loadPage(title + '.html');
+    } else {
+        indexBlock.style.display = '';
     }
 
     const searchResults = document.querySelector('#search-results');
@@ -139,4 +149,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             searchResults.append(a);
         }
     });
+
+    document.querySelector('#back-to-index').addEventListener('click', (e) => {
+        document.querySelector('#content').innerHTML = '';
+        indexBlock.style.display = '';
+        document.title = 'Wikipedia';
+    });
+
+    setLinks(document.querySelectorAll('#index a'));
 });
