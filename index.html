@@ -79,7 +79,12 @@
                     try {
                         const line = source.slice(lineStart, lineEnd);
                         const content = line.match(/^("[^[]+"):(\[.*\]),?\s*$/);
-                        matches.push([JSON.parse(content[1]), JSON.parse(content[2])]);
+                        matches.push([
+                            JSON.parse(content[1]), // file target
+                            JSON.parse(content[2]), // title matches
+                            source[m.index-1] == '"', // is match start of word
+                            m.index - lineStart // distance of match from line start
+                        ]);
                         lastLineEnd = lineEnd;
 
                     } catch (e) {
@@ -89,7 +94,12 @@
                 i++;
             }
 
-            return matches;
+            return matches.sort((a,b) => {
+                if (a[2] && !b[2]) return -1;
+                if (!a[2] && b[2]) return 1;
+                if (a[3] != b[3]) return a[3] - b[3];
+                return a[1][0].length - b[1][0].length;
+            });
         }
 
         window.addEventListener('hashchange', () => {
@@ -117,6 +127,10 @@
                 });
             });
 
+            try {
+                document.title = document.querySelector('h1').innerText;
+            } catch { }
+
             return false;
         }
 
@@ -133,6 +147,7 @@
 
             document.querySelector('#search').addEventListener('input', e => {
                 const matches = findMatches(redirects, e.target.value);
+                console.log(matches)
                 searchResults.innerHTML = '';
                 for (const m of matches) {
                     const a = document.createElement('a');
