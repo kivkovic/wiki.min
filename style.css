@@ -722,3 +722,19 @@ li.gallerybox {
   line-height: 1.5;
   padding: 0 !important;
 }
+
+.locmap .pr {
+  line-height: 110%;
+  position: absolute;
+  top: -0.75em;
+  text-align: left;
+}
+
+.locmap .id {
+  position: absolute;
+  line-height: 0;
+}
+
+.locmap .od {
+  position: absolute;
+}
