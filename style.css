@@ -272,10 +272,18 @@ table {
   font-weight: bold;
 }
 
+.locmap {
+  overflow: hidden;
+}
+
 .locmap .od {
   position: absolute;
 }
 
+a > img, .notpageimage > img {
+  max-width: 100% !important;
+  height: auto !important;
+}
 
 .mwh .hll {
   background-color: #ffffcc
