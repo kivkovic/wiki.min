@@ -135,7 +135,6 @@ let dups = 0;
 
 for (let i = 0; i < files.length; i++) {
     const f = files[i];
-    //if (i > 1000) break;
 
     if (!f.match(/\.html$/)) continue;
 
@@ -154,15 +153,12 @@ for (let i = 0; i < files.length; i++) {
 
         const t = fs.openSync('html/' + f, 'r');
         const html = fs.readFileSync(t);
-        //const html = fs.readFileSync('html/' + f);
-
-        //const dom = new JSDOM(html);
-        //const doc = dom.window.document;
         const doc = nodeHTMLParser.parse(html);
 
         fs.closeSync(t);
 
         const container = doc.querySelector('#pcs');
+        if (!container) continue;
 
         container.querySelectorAll('*[style]').forEach(e => {
             const style = e.getAttribute('style');
@@ -170,25 +166,6 @@ for (let i = 0; i < files.length; i++) {
                 e.setAttribute('style', style.replace(/display: *none;?/, ''));
             }
         });
-
-        /*container.querySelectorAll('figure').forEach(e => {
-            const src = e.querySelector('[data-src]')?.getAttribute('data-src');
-            if (!src) {
-                e.remove();
-                return;
-            }
-
-            const width = e.querySelector('[data-width]').getAttribute('data-width');
-            const height = e.querySelector('[data-height]').getAttribute('data-height');
-            const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
-
-            if (srclocal == null) {
-                e.remove();
-                return;
-            }
-
-            e.innerHTML = `<img src="${srclocal}" width="${width}" height="${height}" />`
-        });*/
 
         container.querySelectorAll('[src]').forEach(e => {
             const src = e.getAttribute('src');
@@ -247,7 +224,7 @@ for (let i = 0; i < files.length; i++) {
             target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
-        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution,.sistersitebox').forEach(e => {
+        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution,.sistersitebox,#pcs-edit-section-add-title-description').forEach(e => {
             e.remove();
         });
 
