@@ -1,6 +1,18 @@
 const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
 
+const files = fs.readdirSync('./html');
+
+
+const allTitles = new Set();
+const allTitlesReverse = new Map();
+const redirectsFull = JSON.parse(fs.readFileSync('index/redirects.json').toString());
+const redirects = {};
+for (const k in redirectsFull) {
+    redirects[k] = redirectsFull[k].filter(o => o.d == undefined);
+}
+
+
 const specialDecode = (s) => {
     return (s
         .replace(/%26/g, '&')
@@ -20,14 +32,6 @@ const specialEncode = (s) => {
         .replace(/\?/g, '%3F')
     );
 };
-
-const allTitles = new Set();
-const allTitlesReverse = new Map();
-const redirectsFull = JSON.parse(fs.readFileSync('index/redirects.json').toString());
-const redirects = {};
-for (const k in redirectsFull) {
-    redirects[k] = redirectsFull[k].filter(o => o.d == undefined);
-}
 
 const skip_dup = new Set();
 
@@ -96,9 +100,6 @@ for (const k in redirects) {
 let timeSum = 1;
 let count = 1;
 
-const files = fs.readdirSync('./html');
-//const files = ['Diophantine equation.html'];
-
 const getimgsrc = (path) => {
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
     const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
@@ -130,6 +131,11 @@ const closestImgParent = (e, debug) => {
     if (thumbcaption) return thumbcaption;
     const closestCell = e.closest('.ib-settlement-cols-cell');
     if (closestCell) return closestCell;
+    const mergedtoprow = e.closest('.mergedtoprow');
+    if (mergedtoprow && mergedtoprow.querySelectorAll('img').length <= 1) return mergedtoprow;
+    const ibfd = e.closest('.ibfd');
+    if (ibfd && ibfd.querySelectorAll('img').length <= 1) return ibfd;
+
     if (e.parentNode.tagName.toLowerCase() == 'a') return e.parentNode;
 
     return e;
@@ -228,7 +234,27 @@ for (let i = 0; i < files.length; i++) {
             target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
-        container.querySelectorAll('link,script,noscript,audio,source,.mwe-math-fallback-image-inline,.pcs-edit-section-link-container,.pcs-fold-hr,.noprint,.pcs-collapse-table-collapsed-container,.pcs-collapse-table-collapsed-bottom,.hatnote,.ext-phonos-attribution,.sistersitebox,#pcs-edit-section-add-title-description').forEach(e => {
+        const remove = [
+            'link',
+            'script',
+            'noscript',
+            'audio',
+            'source',
+            '.mwe-math-fallback-image-inline',
+            '.pcs-edit-section-link-container',
+            '.pcs-fold-hr',
+            '.noprint',
+            '.pcs-collapse-table-collapsed-container',
+            '.pcs-collapse-table-collapsed-bottom',
+            '.hatnote',
+            '.ext-phonos-attribution',
+            '.sistersitebox',
+            '#pcs-edit-section-add-title-description',
+            '.switcher-label',
+            '.ambox',
+        ];
+
+        container.querySelectorAll(remove.join(',')).forEach(e => {
             e.remove();
         });
 
@@ -370,6 +396,13 @@ for (let i = 0; i < files.length; i++) {
                 }
             });
         }
+
+        container.querySelectorAll('.locmap').forEach(e => {
+            // .locmap is switchable location map; each entry has 1 bullet img and map image; if a map is missing, remove the corresponding switch case
+            if (e.querySelectorAll('img').length <= 1) {
+                e.remove();
+            }
+        });
 
         container.querySelectorAll('.pcs-edit-section-header,header,section').forEach(e => {
             e.replaceWith(e.innerHTML);
