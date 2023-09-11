@@ -244,23 +244,6 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        /*container.querySelectorAll('[src]').forEach(e => {
-            if (!e.getAttribute('resource')) {
-                // previously processed
-                return;
-            }
-            const resource = e.getAttribute('resource').replace(/^\.\/File:/,'');
-            const srclocal = getimgsrc(resource);
-
-            if (srclocal == null) {
-                closestImgParent(e, 2).remove();
-                return;
-            }
-
-            e.setAttribute('src', srclocal);
-            e.removeAttribute('resource');
-        });*/
-
         container.querySelectorAll('.pcs-edit-section-title').forEach((e, i) => {
             //console.log(e.innerText.trim())
             if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|General References|(Notes|References|Sources|Citations) and (notes|references|sources|citations|further reading)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)( .+)?|Map gallery|Notes( and (citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns – sister cities)$/i)) {
@@ -392,19 +375,9 @@ for (let i = 0; i < files.length; i++) {
             e.replaceWith(e.innerHTML);
         });
 
-        /*container.querySelectorAll('span').forEach(e => {
-            if (e.innerHTML.trim().length == 0) {
-                e.replaceWith('');
-            }
-        })*/
-
         container.querySelectorAll('[class=""]').forEach(e => {
             e.removeAttribute('class');
         });
-
-        /*container.querySelectorAll('[style=""]').forEach(e => {
-            e.removeAttribute('style');
-        });*/
 
         container.querySelectorAll('a[href]').forEach(e => {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
@@ -462,6 +435,8 @@ const search_index = fs.openSync('search-index.json', 'w');
 fs.writeFileSync(search_index, '{\n');
 const keys = Object.keys(redirects);
 for (let i = 0; i < keys.length; i++) {
-    fs.writeFileSync(search_index, JSON.stringify({ [keys[i].replace(/\.html$/,'')]: redirectsFull[keys[i]] }).slice(1,-1) + (i < keys.length - 1 ? ',' : '') + '\n');
+    const values = redirectsFull[keys[i]].map(s => s.replace ? s.replace(/_/g, ' ') : s);
+    fs.writeFileSync(search_index, JSON.stringify({ [keys[i].replace(/\.html$/,'')]: values }).slice(1,-1) + (i < keys.length - 1 ? ',' : '') + '\n');
 }
 fs.writeFileSync(search_index, '\n}');
+console.log('wrote redirects:', keys.length);
