@@ -431,13 +431,15 @@ for (let i = 0; i < files.length; i++) {
                     const hash = (href.match(/(#.+)$/) || [])[1] || '';
                     const realHref = (allTitlesReverse.get(title2) ?? allTitlesReverse.get(specialEncode(title2))).replace(/\.html$/,'');
                     e.setAttribute('href', realHref + hash);
-                }
 
-                const title3 = e.innerHTML.trim().toLowerCase();
-                if (allTitles.has(title3)) {
-                    e.setAttribute('href', title3);
                 } else {
-                    e.replaceWith(e.innerHTML);
+                    /*const title3 = e.innerHTML.trim().toLowerCase();
+                    if (allTitles.has(title3)) {
+                        console.log(3, title3)
+                        e.setAttribute('href', title3);
+                    } else {*/
+                        e.replaceWith(e.innerHTML);
+                    //}
                 }
 
             }
