@@ -215,7 +215,7 @@ for (let i = 0; i < files.length; i++) {
 
             const figure = e.closest('figure');
             if (figure && !figure.classList.contains('mw-halign-left') && !figure.classList.contains('mw-halign-right')) {
-                figure.classList.add('hal');
+                figure.classList.add('har');
             }
 
             const target = e.parentNode.tagName == 'A' ? e.parentNode : e;
@@ -246,7 +246,7 @@ for (let i = 0; i < files.length; i++) {
                 && !figure.classList.contains('har')
                 && !figure.classList.contains('hal')
             ) {
-                figure.classList.add('hal');
+                figure.classList.add('har');
             }
 
             const target = e.parentNode.tagName == 'A' ? e.parentNode : e;
