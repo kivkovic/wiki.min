@@ -113,6 +113,11 @@ let timeSum = 1;
 let count = 1;
 
 const getimgsrc = (path) => {
+
+    if (path.match(/^(Interactive_icon\.)/)) {
+        return null;
+    }
+
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
     const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
 
@@ -411,7 +416,7 @@ for (let i = 0; i < files.length; i++) {
             });
         }
 
-        container.querySelectorAll('.locmap').forEach(e => {
+        container.querySelectorAll('.locmap,.thumb').forEach(e => {
             // .locmap is switchable location map; each entry has 1 bullet img and map image; if a map is missing, remove the corresponding switch case
             if (e.querySelectorAll('img').length <= 1) {
                 e.remove();

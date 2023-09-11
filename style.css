@@ -26,6 +26,11 @@ li {
   margin-bottom: 10px;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .ibsc {
   text-align: center;
   display: table;
@@ -54,11 +59,14 @@ li {
   display: none;
 }
 
-.wt, .wt > tbody > tr > td, .wt > tbody > tr > th {
-  border: 1px solid rgba(84,89,93,0.3);
+.wt,
+.wt>tbody>tr>td,
+.wt>tbody>tr>th {
+  border: 1px solid rgba(84, 89, 93, 0.3);
 }
 
-.wt > tbody > tr > td, .wt > tbody > tr > th {
+.wt>tbody>tr>td,
+.wt>tbody>tr>th {
   padding: 4px 6px;
 }
 
@@ -68,23 +76,20 @@ li {
   text-align: center;
 }
 
-@media screen and (min-width: 720px) {
+.har,
+.thumb.tright {
+  float: right;
+  clear: right;
+  margin-left: 1.4em;
+  margin-right: 0;
+}
 
-  .har,
-  .thumb.tright {
-    float: right;
-    clear: right;
-    margin-left: 1.4em;
-    margin-right: 0;
-  }
-
-  .hal,
-  .thumb.tleft {
-    float: left;
-    clear: left;
-    margin-left: 0;
-    margin-right: 1.4em;
-  }
+.hal,
+.thumb.tleft {
+  float: left;
+  clear: left;
+  margin-left: 0;
+  margin-right: 1.4em;
 }
 
 .nw,
@@ -110,7 +115,8 @@ h4,
 h5,
 h6 {
   padding: 0.25em 0;
-  clear: left; /* TEST, maybe remove */
+  clear: left;
+  /* TEST, maybe remove */
 }
 
 h1,
@@ -124,7 +130,9 @@ h6 {
   word-break: break-word;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin-top: 0.5em;
   margin-bottom: 0em;
 }
@@ -280,7 +288,8 @@ table {
   position: absolute;
 }
 
-a > img, .notpageimage > img {
+a>img,
+.notpageimage>img {
   max-width: 100% !important;
   height: auto !important;
 }
@@ -673,9 +682,21 @@ figcaption {
   text-align: center;
 }
 
+.center * {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .thumb .thumbinner {
   margin: 0 auto;
   max-width: 100% !important;
+}
+
+div.thumbinner {
+  border: 1px solid #c8ccd1;
+  background-color: #f8f9fa;
+  font-size: 94%;
+  overflow: hidden;
 }
 
 .tmulti .multiimageinner {
@@ -707,7 +728,8 @@ ul.gallery {
   display: block;
 }
 
-.center > *, .center .thumb {
+.center>*,
+.center .thumb {
   margin-left: auto;
   margin-right: auto;
 }
@@ -745,4 +767,115 @@ li.gallerybox {
 
 .locmap .od {
   position: absolute;
+}
+
+table.clade {
+  border-spacing: 0;
+  margin: 0;
+  font-size: 100%;
+  line-height: 100%;
+  border-collapse: separate;
+  width: auto
+}
+
+table.clade table.clade {
+  width: 100%;
+  line-height: inherit
+}
+
+table.clade td.clade-label {
+  min-width: 0.2em;
+  width: 0.1em;
+  padding: 0 0.15em;
+  vertical-align: bottom;
+  text-align: center;
+  border-left: 1px solid;
+  border-bottom: 1px solid;
+  white-space: nowrap
+}
+
+table.clade td.clade-label::before,
+table.clade td.clade-slabel::before {
+  content: "\2060 "
+}
+
+table.clade td.clade-fixed-width {
+  overflow: hidden;
+  text-overflow: ellipsis
+}
+
+table.clade td.clade-fixed-width:hover {
+  overflow: visible
+}
+
+table.clade td.clade-label.first {
+  border-left: none;
+  border-right: none
+}
+
+table.clade td.clade-label.reverse {
+  border-left: none;
+  border-right: 1px solid
+}
+
+table.clade td.clade-slabel {
+  padding: 0 0.15em;
+  vertical-align: top;
+  text-align: center;
+  border-left: 1px solid;
+  white-space: nowrap
+}
+
+table.clade td.clade-slabel:hover {
+  overflow: visible
+}
+
+table.clade td.clade-slabel.last {
+  border-left: none;
+  border-right: none
+}
+
+table.clade td.clade-slabel.reverse {
+  border-left: none;
+  border-right: 1px solid
+}
+
+table.clade td.clade-bar {
+  vertical-align: middle;
+  text-align: left;
+  padding: 0 0.5em;
+  position: relative
+}
+
+table.clade td.clade-bar.reverse {
+  text-align: right;
+  position: relative
+}
+
+table.clade td.clade-leaf {
+  border: 0;
+  padding: 0;
+  text-align: left
+}
+
+table.clade td.clade-leafR {
+  border: 0;
+  padding: 0;
+  text-align: right
+}
+
+table.clade td.clade-leaf.reverse {
+  text-align: right
+}
+
+table.clade:hover span.linkA {
+  background-color: yellow
+}
+
+table.clade:hover span.linkB {
+  background-color: green
+}
+
+img[src="i/Interactive_icon.webp"] {
+  display: none;
 }
