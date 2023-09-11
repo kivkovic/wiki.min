@@ -166,8 +166,6 @@ for (let i = 0; i < files.length; i++) {
         continue;
     }
 
-    continue;
-
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
     //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
 
