@@ -9,13 +9,21 @@ const files = fs.readdirSync('./html')
         hash: hash(f.toLowerCase()).hex().slice(0,3),
     })).sort((a,b) => a.hash.localeCompare(b.hash));
 
-const allTitles = new Set();
-const allTitlesReverse = new Map();
+
 const redirectsFull = JSON.parse(fs.readFileSync('index/redirects.json').toString());
 const redirects = {};
+
 for (const k in redirectsFull) {
     redirects[k] = redirectsFull[k].filter(o => o.d == undefined);
+    if (!fs.existsSync('html/' + k)) {
+        console.log('redirects.json is incosistent with filesystem contents!');
+        console.log('following json key is not found on fs:', k);
+        process.exit(1);
+    }
 }
+
+const allTitles = new Set();
+const allTitlesReverse = new Map();
 
 const specialDecode = (s) => {
     return (s
@@ -112,13 +120,6 @@ const getimgsrc = (path) => {
     if (fs.existsSync(diskpath)) {
         return 'i/' + encodeURIComponent(specialEncode(mainanme)) + '.webp';
     }
-
-    /*const finalpath2 = 'i/' + allEncode(mainanme) + '.webp';
-    if (fs.existsSync(finalpath2)) {
-        return finalpath2;
-    }*/
-
-    //console.log('img skip', mainanme);
     return null;
 };
 
@@ -164,6 +165,8 @@ for (let i = 0; i < files.length; i++) {
         dups++;
         continue;
     }
+
+    continue;
 
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
     //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
@@ -417,6 +420,14 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
+        container.querySelectorAll('.switcher-container').forEach(e => {
+            e.querySelectorAll('.locmap').forEach((f, i) => {
+                if (i > 0) {
+                    f.remove();
+                }
+            })
+        })
+
         container.querySelectorAll('.pcs-edit-section-header,header,section').forEach(e => {
             e.replaceWith(e.innerHTML);
         });
@@ -462,28 +473,12 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        //const fHash = hash(f).hex().slice(0,2);
         if (zipHash != fHash) {
             await createNewZip();
             zipHash = fHash;
             zipFile = new JSZip();
         }
         zipFile.file(f, container.innerHTML);
-
-        //const out = fs.openSync('w/' + f, 'w');
-        //fs.writeFileSync(out, container.innerHTML);
-        //fs.closeSync(out);
-
-        //var zip = new JSZip();
-        //zip.file(f, container.innerHTML);
-        //const compressed = await zip.generateAsync({
-        //    type: "uint8array",
-        //    compression: "DEFLATE",
-        //    compressionOptions: {
-        //        level: 9
-        //    }
-        //});
-        //fs.writeFileSync('w-zip/' + f.replace(/\.html$/,'.zip'), compressed);
 
     } catch (e) {
         console.log(e);
