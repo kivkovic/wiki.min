@@ -60,15 +60,8 @@ function findMatches(source, string) {
 
     for (const match of matchesTop) {
 
-        const titles = [match[0].replace(/\.html$/,'')].concat(match[1]).map(s => specialDecode(s.trim()));
+        const titles = [match[0].replace(/\.html$/,'')].concat(match[1]).map(s => specialDecode(s.trim()).replace(/_/g, ' '));
         const titles_pruned = [];
-
-        /*
-                const titles = JSON.parse(content[2])
-                    .filter((v,i,a) => i == 0 || v.toLowerCase().replace(/[^a-z0-9.\-]/gi, '') != a[0].toLowerCase().replace(/[^a-z0-9.\-]/gi, ''))
-                    .map(v => v.trim());
-
-        */
 
         for (let i = 0; i < titles.length; i++) {
             let skip = false;
