@@ -133,8 +133,12 @@ async function loadPage(linkInput, clearSearch = true) {
 
     container.innerHTML = '';
 
-    const contentResponse = await fetch('./w/' + specialEncode(decodeURIComponent(title)).replace(/%/g,'%25') + '.html');
-    const contentHTML = await contentResponse.text();
+    const contentResponse = await fetch('./w-zip/' + specialEncode(decodeURIComponent(title)).replace(/%/g,'%25') + '.zip');
+    const contentCompressed = await contentResponse.blob();
+
+    const jszip = new JSZip();
+    const contentUncompressed = await jszip.loadAsync(contentCompressed);
+    const contentHTML = await contentUncompressed.files[Object.keys(contentUncompressed.files)[0]].async('string');
     container.innerHTML = contentHTML;
     document.querySelector('#search-results').innerHTML = '';
 
