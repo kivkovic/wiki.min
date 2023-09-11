@@ -17,20 +17,7 @@ const fs = require('fs');
                 level: 9
             }
         });
-        fs.writeFileSync('w-zip/' + f.replace(/\.html$/,'.zip'), compressed);
+        fs.writeFileSync('w/' + f.replace(/\.html$/,'.zip'), compressed);
     }
-
-    /*
-    const compressed = await new Promise(resolve => lzma.compress(
-        fs.readFileSync('w/Fourier transform.html'),
-        6,
-        function (result, error) {
-            console.log(error);
-            resolve(result);
-        }));
-
-    fs.writeFileSync('Fourier transform.lzma', new Int8Array(compressed));
-    //console.log(compressed)
-    */
 
 })();

@@ -501,7 +501,7 @@ async function createNewZip() {
                 level: 9
             }
         });
-        fs.writeFileSync('w-zip/' + zipHash + '.zip', compressed);
+        fs.writeFileSync('w/' + zipHash + '.zip', compressed);
     }
     return true;
 }

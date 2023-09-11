@@ -128,7 +128,7 @@ async function loadPage(linkInput, clearSearch = true) {
 
     const fileName = specialEncode(decodeURIComponent(title)).toLowerCase() + '.html';
     const zipName = fnvplus.hash(fileName).hex().slice(0,3);
-    const contentResponse = await fetch('./w-zip/' + zipName + '.zip');
+    const contentResponse = await fetch('./w/' + zipName + '.zip');
     const contentCompressed = await contentResponse.blob();
     const jszip = new JSZip();
     const contentUncompressed = await jszip.loadAsync(contentCompressed);
