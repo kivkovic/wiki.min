@@ -21,9 +21,9 @@ let comma = false;
 for (let i = 0; i < files.length; i++) {
     const f = files[i];
 
-    if (!f.match(/\.html$/)) continue;
+    if (!f.match(/\.html$/) || f == 'index.html') continue;
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${f}, ${i+1}/${files.length}, ETA ${rem}h`)
+    console.log(`${f}, ${i+1}/${files.length}, ETA ${rem}h`) ///////////////
 
     const start = +new Date();
 
@@ -44,7 +44,12 @@ for (let i = 0; i < files.length; i++) {
 
         //const redirects3 = redirects2.filter(r => r.toLowerCase().replace(/[^a-z0-9.\-]/gi, '') != title.toLowerCase().replace(/[^a-z0-9.\-]/gi, ''));
 
-        const list = JSON.stringify({ [f]: [title].concat(redirects2) }).slice(1,-1);
+        const descElem = doc.querySelector('#pcs-edit-section-title-description');
+        const addDescElemt = doc.querySelector('#pcs-edit-section-add-title-description');
+
+        const description = addDescElemt && !descElem ? '' : descElem.innerText.trim();
+
+        const list = JSON.stringify({ [f]: [title].concat(redirects2).concat({d:description}) }).slice(1,-1);
         fs.writeFileSync(stats_redirects, (comma ? ',' : '') + '\n' + list);
 
         if (!comma) comma = true;

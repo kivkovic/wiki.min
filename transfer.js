@@ -23,7 +23,11 @@ const specialEncode = (s) => {
 
 const allTitles = new Set();
 const allTitlesReverse = new Map();
-const redirects = JSON.parse(fs.readFileSync('index/redirects.json').toString());
+const redirectsFull = JSON.parse(fs.readFileSync('index/redirects.json').toString());
+const redirects = {};
+for (const k in redirectsFull) {
+    redirects[k] = redirectsFull[k].filter(o => o.d == undefined);
+}
 
 const skip_dup = new Set();
 
@@ -458,6 +462,6 @@ const search_index = fs.openSync('search-index.json', 'w');
 fs.writeFileSync(search_index, '{\n');
 const keys = Object.keys(redirects);
 for (let i = 0; i < keys.length; i++) {
-    fs.writeFileSync(search_index, JSON.stringify({ [keys[i].replace(/\.html$/,'')]: redirects[keys[i]] }).slice(1,-1) + (i < keys.length - 1 ? ',' : '') + '\n');
+    fs.writeFileSync(search_index, JSON.stringify({ [keys[i].replace(/\.html$/,'')]: redirectsFull[keys[i]] }).slice(1,-1) + (i < keys.length - 1 ? ',' : '') + '\n');
 }
 fs.writeFileSync(search_index, '\n}');

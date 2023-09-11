@@ -29,12 +29,18 @@ function findMatches(source, string) {
             try {
                 const line = source.slice(lineStart, lineEnd);
                 const content = line.match(/^("[^[]+"):(\[.*\]),?\s*$/);
+                const other_titles = JSON.parse(content[2]);
+                const description = other_titles.slice(-1)[0].d;
+                if (description != undefined) {
+                    other_titles.splice(other_titles.length - 1, 1);
+                }
 
                 matches.push([
                     JSON.parse(content[1]), // file target
-                    JSON.parse(content[2]), // title matches
+                    other_titles, // title matches
                     source[m.index - 1] == '"', // is match start of word
-                    m.index - lineStart // distance of match from line start
+                    m.index - lineStart, // distance of match from line start
+                    description || '',
                 ]);
                 lastLineEnd = lineEnd;
 
@@ -173,8 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResults.innerHTML = '';
         for (const m of matches) {
             const a = document.createElement('a');
-            m[1][0] = `<b>${m[1][0]}</b>`;
-            a.innerHTML = m[1].join(', ');
+            a.innerHTML = `<b>${m[1][0]}</b> - ` + (m[4] || m[1].slice(1).slice(0,4).join(', '));
             a.setAttribute('href', '#');
             a.addEventListener('click', (e) => {
                 e.preventDefault();
