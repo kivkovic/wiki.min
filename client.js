@@ -178,7 +178,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResults.innerHTML = '';
         for (const m of matches) {
             const a = document.createElement('a');
-            a.innerHTML = `<b>${m[1][0]}</b> - ` + (m[4] || m[1].slice(1).slice(0,4).join(', '));
+            const secondary = (m[4] || m[1].slice(1).slice(0,4).join(', '));
+            a.innerHTML = `<b>${m[1][0]}</b>` + (secondary ? ' - ' : '') + secondary;
             a.setAttribute('href', '#');
             a.addEventListener('click', (e) => {
                 e.preventDefault();
