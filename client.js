@@ -126,12 +126,14 @@ async function loadPage(linkInput, clearSearch = true) {
 
     container.innerHTML = '';
 
-    const contentResponse = await fetch('./w-zip/' + specialEncode(decodeURIComponent(title)).replace(/%/g,'%25') + '.zip');
+    const fileName = specialEncode(decodeURIComponent(title)).toLowerCase() + '.html';
+    const zipName = fnvplus.hash(fileName).hex().slice(0,3);
+    const contentResponse = await fetch('./w-zip/' + zipName + '.zip');
     const contentCompressed = await contentResponse.blob();
-
     const jszip = new JSZip();
     const contentUncompressed = await jszip.loadAsync(contentCompressed);
-    const contentHTML = await contentUncompressed.files[Object.keys(contentUncompressed.files)[0]].async('string');
+    const key = Object.keys(contentUncompressed.files).filter(k => k.toLowerCase() == fileName)[0];
+    const contentHTML = await contentUncompressed.files[key].async('string');
     container.innerHTML = contentHTML;
     document.querySelector('#search-results').innerHTML = '';
 

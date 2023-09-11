@@ -1,8 +1,13 @@
 const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
+const JSZip = require('jszip');
+const { hash } = require('./fnv-plus.js');
 
-const files = fs.readdirSync('./html');
-
+const files = fs.readdirSync('./html')
+    .map(f => ({
+        path: f,
+        hash: hash(f.toLowerCase()).hex().slice(0,3),
+    })).sort((a,b) => a.hash.localeCompare(b.hash));
 
 const allTitles = new Set();
 const allTitlesReverse = new Map();
@@ -11,7 +16,6 @@ const redirects = {};
 for (const k in redirectsFull) {
     redirects[k] = redirectsFull[k].filter(o => o.d == undefined);
 }
-
 
 const specialDecode = (s) => {
     return (s
@@ -91,7 +95,7 @@ Object.keys(redirects).forEach(k => {
 });
 
 for (const k in redirects) {
-    const def = k.replace(/\.html$/, '');
+    const def = k.replace(/\.html$/, '').replace(/_/g, ' ');
     if (redirects[k].indexOf(def) == -1) {
         redirects[k].unshift(def);
     }
@@ -143,8 +147,15 @@ const closestImgParent = (e, debug) => {
 
 let dups = 0;
 
+(async function () {
+
+let zipFile;
+let zipHash;
+//let lastFile;
+
 for (let i = 0; i < files.length; i++) {
-    const f = files[i];
+    const f = files[i].path;
+    const fHash = files[i].hash;
 
     if (!f.match(/\.html$/)) continue;
 
@@ -155,9 +166,11 @@ for (let i = 0; i < files.length; i++) {
     }
 
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
+    //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
 
     const start = +new Date();
+
+    lastFile = f;
 
     try {
 
@@ -416,7 +429,10 @@ for (let i = 0; i < files.length; i++) {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
             const title = specialEncode(href.replace(/#.*$/, '').toLowerCase()).replace(/\.html$/, '');
 
+            //console.log(title);
+
             if (allTitles.has(title)) {
+                //console.log(1)
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
                 const realHref = allTitlesReverse.get(title).replace(/\.html$/,'');
                 e.setAttribute('href', realHref + hash);
@@ -428,6 +444,7 @@ for (let i = 0; i < files.length; i++) {
                 } catch (e) { }
 
                 if (title2 && allTitles.has(title2)) {
+                    //console.log(2)
                     const hash = (href.match(/(#.+)$/) || [])[1] || '';
                     const realHref = (allTitlesReverse.get(title2) ?? allTitlesReverse.get(specialEncode(title2))).replace(/\.html$/,'');
                     e.setAttribute('href', realHref + hash);
@@ -445,11 +462,28 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        const out = fs.openSync('w/' + f, 'w');
-        fs.writeFileSync(out, container.innerHTML);
-        fs.closeSync(out);
+        //const fHash = hash(f).hex().slice(0,2);
+        if (zipHash != fHash) {
+            await createNewZip();
+            zipHash = fHash;
+            zipFile = new JSZip();
+        }
+        zipFile.file(f, container.innerHTML);
 
-        //process.exit()
+        //const out = fs.openSync('w/' + f, 'w');
+        //fs.writeFileSync(out, container.innerHTML);
+        //fs.closeSync(out);
+
+        //var zip = new JSZip();
+        //zip.file(f, container.innerHTML);
+        //const compressed = await zip.generateAsync({
+        //    type: "uint8array",
+        //    compression: "DEFLATE",
+        //    compressionOptions: {
+        //        level: 9
+        //    }
+        //});
+        //fs.writeFileSync('w-zip/' + f.replace(/\.html$/,'.zip'), compressed);
 
     } catch (e) {
         console.log(e);
@@ -464,6 +498,23 @@ for (let i = 0; i < files.length; i++) {
 
 }
 
+async function createNewZip() {
+    if (zipFile) {
+        console.log('creating ' + zipHash + '.zip');
+        const compressed = await zipFile.generateAsync({
+            type: "uint8array",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9
+            }
+        });
+        fs.writeFileSync('w-zip/' + zipHash + '.zip', compressed);
+    }
+    return true;
+}
+
+createNewZip();
+
 console.log('Skipped duplicates:', dups);
 
 const search_index = fs.openSync('search-index.json', 'w');
@@ -475,3 +526,5 @@ for (let i = 0; i < keys.length; i++) {
 }
 fs.writeFileSync(search_index, '\n}');
 console.log('wrote redirects:', keys.length);
+
+})();
