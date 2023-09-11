@@ -22,7 +22,7 @@ if (fs.existsSync('stats/images-infobox')) {
 
 //const titles = ['Batman', 'American_comic_book'];
 const list = fs.readFileSync('articles_v2').toString();
-const titles =  list.split(/\n/g);
+const titles =  list.split(/\n/g).filter(s => s.trim().length > 0);
 
 let timeSum = 1;
 let count = 1;
