@@ -25,7 +25,7 @@ const map = new Map();
 
 for (const img in images) {
 
-    const basename = img.split('/').slice(-1)[0].replace(/^(?:(?:(?:lossy|lossless)-)?page\d+-)?\d+px-/, '').replace(/\.((svg|pdf|xcf)\.png|png|jpe?g|gif|webp|tiff?)$/i,'');
+    const basename = img.split('/').slice(-1)[0].replace(/^(?:(?:(?:lossy|lossless)-)?page\d+-)?\d+px-/i, '').replace(/\.((svg|pdf|xcf|tiff?)\.png|png|jpe?g|gif|webp|tiff?)$/i,'');
     if (fs.existsSync('i/' + basename + '.webp')) continue;
 
     const size = Number(((img.match(/[\/\-](\d+)px-/)||[])[1]||220));
@@ -59,10 +59,12 @@ for (const [key, value] of map.entries()) {
 console.log('images to download:', map.size);
 
 (async function () {
+    await new Promise(r => setTimeout(r, 3000));
+
     let i = 0;
     for (const [key, value] of map.entries()) {
 
-        const name = key.length < 250 ? key : key.slice(0,245) + value.extension;
+        const name = key.length < 250 ? key : key.slice(0,245);
         const savePath = 'images/' + name + value.extension;
 
         if (fs.existsSync(savePath)) continue;
