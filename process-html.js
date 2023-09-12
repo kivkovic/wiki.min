@@ -2,6 +2,7 @@ const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
 const JSZip = require('jszip');
 const { hash } = require('./fnv-plus.js');
+const levenshtein_dist = require('./levenshtein.js');
 
 const files = fs.readdirSync('./html')
     .map(f => ({
@@ -57,45 +58,30 @@ Object.keys(redirects).forEach(k => {
         const t = specialEncode(r.toLowerCase());
         if (allTitlesReverse.has(t)) {
             const k2 = allTitlesReverse.get(t);
-            if (k2 != k) {
-
-                const r1 = JSON.stringify(redirects[k].sort().map(s => s.toLowerCase().trim()));
-                const r2 = JSON.stringify(redirects[k2].sort().map(s => s.toLowerCase().trim()));
-
-                if (r1 == r2) {
-
-                    const first = redirects[k][0].trim();
-                    const kt1 = k.replace(/\.html$/, '').trim();
-                    const kt2 = k2.replace(/\.html$/, '').trim();
-
-                    if (kt1 == first && kt2 != first) {
-                        skip_dup.add(k2);
-                    } else if (kt2 == first && kt1 != first) {
-                        skip_dup.add(k);
-                    } else if (kt1.indexOf(first) == 0 && kt2.indexOf(first) != 0) {
-                        skip_dup.add(k2);
-                    } else if (kt2.indexOf(first) == 0 && kt1.indexOf(first) != 0) {
-                        skip_dup.add(k);
-                    } else {
-                        const i1 = redirects[k].map(s => s.toLowerCase()).indexOf(kt1.toLowerCase());
-                        const i2 = redirects[k].map(s => s.toLowerCase()).indexOf(kt2.toLowerCase());
-                        if (i1 == -1 && i2 == -1) {
-                            if (kt1.length < kt2.length) {
-                                skip_dup.add(k2);
-                            } else {
-                                skip_dup.add(k);
-                            }
-                        } else if (i1 > -1 && i2 == -1) {
-                            skip_dup.add(k2);
-                        } else if (i1 == -1 && i2 > -1) {
-                            skip_dup.add(k);
-                        } else if (i1 < i2) {
-                            skip_dup.add(k2);
-                        } else if (i1 > i2) {
-                            skip_dup.add(k);
+            if (k2 != k) { // this happens when two different articles are referenced by the same alt-title so we should give preference to the closer one
+                const index1 = redirects[k].map(s => s.toLowerCase()).indexOf(t.toLowerCase());
+                const index2 = redirects[k2].map(s => s.toLowerCase()).indexOf(t.toLowerCase());
+                if (index1 < index2 && index1 <= 3) {
+                    allTitlesReverse.set(t, k);
+                } else if (index2 < index1 && index2 <= 3) {
+                    allTitlesReverse.set(t, k2);
+                } else {
+                    const dist1 = levenshtein_dist(redirects[k][0], t) / t.length;
+                    const dist2 = levenshtein_dist(redirects[k2][0], t) / t.length;
+                    allTitlesReverse.delete(t);
+                    if (Math.min(dist1, dist2) < 0.5) {
+                        if (dist1 < dist2) {
+                            allTitlesReverse.set(t, k);
+                        } else if (dist2 < dist1) {
+                            allTitlesReverse.set(t, k2);
+                        } else {
+                            // just give up
                         }
+                    } else {
+                        // just give up
                     }
                 }
+                return;
             }
         }
         allTitlesReverse.set(t, k);
