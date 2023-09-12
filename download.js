@@ -21,29 +21,43 @@ const specialEncode = (s) => {
         .replace(/"/g, '%22')
         .replace(/</g, '%3C')
         .replace(/>/g, '%3E')
+        .replace(/\+/g, '%2B')
     );
 };
+
+if (!fs.existsSync('html/')) {
+    fs.mkdirSync('html');
+}
+
+function decode(string) {
+    return string.replace(/(%..)/g, (m0, m1) => {
+        const d = he.decode(m1);
+        try {
+            return decodeURIComponent(d);
+        } catch {
+            return d;
+        }
+    })
+}
 
 (async () => {
     for (let j = 0; j < titles.length; j += 5) {
         const batch = titles.slice(j, j+5).filter(title => {
-            const safetitle = he.decode(title).replace(/<[^<>]+>/g,'').replace(/[\*\?\&\:<>|\/\\]/g, s => s == '*' ? '%2A' : encodeURIComponent(s));
+            const safetitle = specialEncode(decode(title)); //he.decode(title).replace(/<[^<>]+>/g,'').replace(/[\*\?\&\:<>|\/\\]/g, s => s == '*' ? '%2A' : encodeURIComponent(s));
             const exists = fs.existsSync('html/' + safetitle + '.html');
             return title && !exists;
         });
 
-        const rem = ((titles.length - j) * (timeSum / count) / 3600).toFixed(2);
+        if (!batch.length) continue;
+
+        const rem = ((titles.length - j) / 5 * (timeSum / count) / 3600).toFixed(2);
         console.log(`${j+1}/${titles.length}, ETA ${rem}h`)
+        const start = +new Date();
 
         await Promise.all(batch.map(async (title) => {
 
             try {
-                const start = +new Date();
-                const safetitle = he.decode(title).replace(/\\"/g, '"').replace(/<[^<>]+>/g,'').replace(/[\*\?\&\:<>|\/\\]/g, s => s == '*' ? '%2A' : encodeURIComponent(s));
-                console.log(safetitle);
-
-                const url = title.replace(/\\"/g, '"').replace(/\&/g, '%26').replace(/\+/g, '%2B').replace(/\//g, '%2F');
-
+                const url = specialEncode(title).replace(/%/g, '%25');
                 const page = await wiki.page(url);
                 const html = await page.mobileHtml();
                 const doc = nodeHTMLParser.parse(html);
@@ -64,22 +78,24 @@ const specialEncode = (s) => {
 
                 fs.appendFileSync('html/' + fileTitle + '.html', doc.toString());
 
-                const realEnd = +new Date();
-                const fullDuration = (realEnd - start) / 1000;
-                timeSum += fullDuration;
-                count++;
-
                 consecutiveErrors = 0;
 
             } catch (error) {
                 console.log(error);
                 consecutiveErrors++;
+                //process.exit(1)
+                fs.appendFileSync('download-errors', title);
             }
 
             return 1;
         }));
 
-        await new Promise(r => setTimeout(r, 100));
+        const realEnd = +new Date();
+        const fullDuration = (realEnd - start) / 1000;
+        timeSum += fullDuration;
+        count++;
+
+        await new Promise(r => setTimeout(r, 1000));
 
         if (consecutiveErrors >= 10) {
             console.log('terminating after 10 errors');
