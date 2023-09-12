@@ -102,13 +102,13 @@ const imgCache = new Map();
 
 const getimgsrc = (inputpath) => {
 
-    if (inputpath.match(/^(Interactive_icon\.)/)) {
+    if (inputpath.match(/^(Interactive_icon\.)/i)) {
         return null;
     }
 
     const path = inputpath.replace(/[?#].*$/,'');
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
-    const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
+    const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '');
 
     const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
 
@@ -137,6 +137,8 @@ const closestImgParent = (e, debug) => {
     if (gallerybox) return gallerybox;
     const thumbcaption = e.closest('.thumbcaption');
     if (thumbcaption) return thumbcaption;
+    const timeline = e.getAttribute('usemap') && e.closest('.timeline-wrapper');
+    if (timeline) return timeline;
     const closestCell = e.closest('.ib-settlement-cols-cell');
     if (closestCell) return closestCell;
     const mergedtoprow = e.closest('.mergedtoprow');
@@ -170,7 +172,7 @@ for (let i = 0; i < files.length; i++) {
     }
 
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
+    console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
 
     const start = +new Date();
 
@@ -271,6 +273,8 @@ for (let i = 0; i < files.length; i++) {
             '.switcher-label',
             '.ambox',
             '.hidden-begin',
+            '.portalbox',
+            '.navbar',
         ];
 
         container.querySelectorAll(remove.join(',')).forEach(e => {
@@ -417,19 +421,45 @@ for (let i = 0; i < files.length; i++) {
         }
 
         container.querySelectorAll('.locmap,.thumb').forEach(e => {
-            // .locmap is switchable location map; each entry has 1 bullet img and map image; if a map is missing, remove the corresponding switch case
-            if (e.querySelectorAll('img').length <= 1) {
+            if (e.querySelectorAll('img').length == 0) {
                 e.remove();
             }
         });
 
-        container.querySelectorAll('.switcher-container').forEach(e => {
-            e.querySelectorAll('.locmap').forEach((f, i) => {
-                if (i > 0) {
-                    f.remove();
+        container.querySelectorAll('table td > b').forEach(e => {
+            if (e.innerText.trim().match(/^(Notes|References):$/i)) {
+                if (e.parentNode.querySelector('ul,li')) {
+                    const cell = e.parentNode;
+                    const row = cell.parentNode;
+                    if (row.querySelectorAll('td').length == 1) {
+                        row.remove();
+                    } else {
+                        cell.remove();
+                    }
                 }
-            })
-        })
+            }
+        });
+
+        container.querySelectorAll('.switcher-container').forEach(e => {
+            let found_ok = null;
+            e.querySelectorAll('.locmap').forEach((f, i) => {
+                if (f.querySelectorAll('img').length >= 2) {
+                    found_ok = i;
+                    return;
+                }
+            });
+            if (found_ok != null) {
+                e.querySelectorAll('.locmap').forEach((f, i) => {
+                    if (i != found_ok) f.remove();
+                });
+            } else {
+                e.remove();
+            }
+        });
+
+        container.querySelectorAll('section').forEach(e => {
+            if (e.innerText.length < 200) e.remove();
+        });
 
         container.querySelectorAll('.pcs-edit-section-header,header,section').forEach(e => {
             e.replaceWith(e.innerHTML);
@@ -443,10 +473,7 @@ for (let i = 0; i < files.length; i++) {
             const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
             const title = specialEncode(href.replace(/#.*$/, '').toLowerCase()).replace(/\.html$/, '');
 
-            //console.log(title);
-
             if (allTitles.has(title)) {
-                //console.log(1)
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
                 const realHref = allTitlesReverse.get(title).replace(/\.html$/,'');
                 e.setAttribute('href', realHref + hash);
