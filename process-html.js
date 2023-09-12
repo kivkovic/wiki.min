@@ -10,6 +10,9 @@ const files = fs.readdirSync('./html')
         hash: hash(f.toLowerCase()).hex().slice(0,3),
     })).sort((a,b) => a.hash.localeCompare(b.hash));
 
+if (!fs.existsSync('w/')) {
+    fs.mkdirSync('w');
+}
 
 const redirectsFull = JSON.parse(fs.readFileSync('index/redirects.json').toString());
 const redirects = {};

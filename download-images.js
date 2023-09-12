@@ -1,6 +1,10 @@
 const fs = require('fs');
 const https = require('https');
 
+if (!fs.existsSync('images/')) {
+    fs.mkdirSync('images');
+}
+
 const images = JSON.parse(fs.readFileSync('index/images.json'));
 
 function download(url, filepath) {

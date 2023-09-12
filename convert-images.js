@@ -3,6 +3,10 @@ const fs = require('fs');
 
 const files = fs.readdirSync('images').filter(f => f.match(/\.(jpe?g|png|gif|webp|tiff?|svg)$/i));
 
+if (!fs.existsSync('i/')) {
+    fs.mkdirSync('i');
+}
+
 const outdir = 'i/';
 
 (async function () {
