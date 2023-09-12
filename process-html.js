@@ -112,17 +112,29 @@ for (const k in redirects) {
 let timeSum = 1;
 let count = 1;
 
-const getimgsrc = (path) => {
+const imgCache = new Map();
 
-    if (path.match(/^(Interactive_icon\.)/)) {
+const getimgsrc = (inputpath) => {
+
+    if (inputpath.match(/^(Interactive_icon\.)/)) {
         return null;
     }
 
+    const path = inputpath.replace(/[?#].*$/,'');
     const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
     const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/, '');
 
     const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
-    if (fs.existsSync(diskpath)) {
+
+    let exists;
+    if (!imgCache.has(diskpath)) {
+        exists = fs.existsSync(diskpath);
+        imgCache.set(diskpath, exists);
+    } else {
+        exist = imgCache.get(diskpath);
+    }
+
+    if (exists) {
         return 'i/' + encodeURIComponent(specialEncode(mainanme)) + '.webp';
     }
     return null;
@@ -202,6 +214,7 @@ for (let i = 0; i < files.length; i++) {
             const height = e.getAttribute('height');
             const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
 
+            //console.log(srclocal)
             if (srclocal == null) {
                 closestImgParent(e, 1).remove();
                 return;
@@ -271,6 +284,7 @@ for (let i = 0; i < files.length; i++) {
             '#pcs-edit-section-add-title-description',
             '.switcher-label',
             '.ambox',
+            '.hidden-begin',
         ];
 
         container.querySelectorAll(remove.join(',')).forEach(e => {
@@ -524,5 +538,16 @@ for (let i = 0; i < keys.length; i++) {
 }
 fs.writeFileSync(search_index, '\n}');
 console.log('wrote redirects:', keys.length);
+
+// unmatched images:
+const unmatched = [];
+const images = fs.readdirSync('./i');
+for (const img of images) {
+    if (!imgCache.has('i/' + img) || !imgCache.get('i/' + img)) {
+        unmatched.push(img);
+    }
+}
+
+fs.writeFileSync('unmatched-images', JSON.stringify(unmatched, undefined, 2));
 
 })();
