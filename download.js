@@ -4,7 +4,7 @@ const nodeHTMLParser = require('node-html-parser');
 const he = require('he');
 
 
-const list = fs.readFileSync('articles_v2').toString();
+const list = fs.readFileSync('articles_v3').toString();
 const titles =  list.split(/\n/g).filter(s => s.trim().length > 0);
 
 let timeSum = 1;
@@ -57,17 +57,12 @@ const specialEncode = (s) => {
 
                 const fileTitle = specialEncode(doc.querySelector('title')
                     .innerText
-                    .replace(/&lt;/g,'<')
-                    .replace(/&gt;/g,'>')
-                    .replace(/\&amp;/g, '&')
-                    .replace(/<\/?([a-z]+)[^<>]*>/g, ''));
+                    .replace(/&lt;/gi,'<')
+                    .replace(/&gt;/gi,'>')
+                    .replace(/\&amp;/gi, '&')
+                    .replace(/<(\/|%2f)?([a-z]+)[^<>]*>/gi, ''));
 
                 fs.appendFileSync('html/' + fileTitle + '.html', doc.toString());
-
-                const end = +new Date();
-                if (end - start < 30) {
-                    await new Promise(r => setTimeout(r, 30));
-                }
 
                 const realEnd = +new Date();
                 const fullDuration = (realEnd - start) / 1000;
@@ -83,6 +78,8 @@ const specialEncode = (s) => {
 
             return 1;
         }));
+
+        await new Promise(r => setTimeout(r, 100));
 
         if (consecutiveErrors >= 10) {
             console.log('terminating after 10 errors');

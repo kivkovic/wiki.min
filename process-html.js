@@ -76,9 +76,11 @@ Object.keys(redirects).forEach(k => {
                             allTitlesReverse.set(t, k2);
                         } else {
                             // just give up
+                            //console.log('(1) unmatched reverse:', t)
                         }
                     } else {
                         // just give up
+                        //console.log('(2) unmatched reverse:', t)
                     }
                 }
                 return;
@@ -157,7 +159,6 @@ let dups = 0;
 
 let zipFile;
 let zipHash;
-//let lastFile;
 
 for (let i = 0; i < files.length; i++) {
     const f = files[i].path;
@@ -172,10 +173,7 @@ for (let i = 0; i < files.length; i++) {
     }
 
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
-
     const start = +new Date();
-
     lastFile = f;
 
     try {
@@ -202,7 +200,6 @@ for (let i = 0; i < files.length; i++) {
             const height = e.getAttribute('height');
             const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
 
-            //console.log(srclocal)
             if (srclocal == null) {
                 closestImgParent(e, 1).remove();
                 return;
@@ -307,7 +304,6 @@ for (let i = 0; i < files.length; i++) {
         });
 
         container.querySelectorAll('.pcs-edit-section-title').forEach((e, i) => {
-            //console.log(e.innerText.trim())
             if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|General References|(Notes|References|Sources|Citations) and (notes|references|sources|citations|further reading)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)( .+)?|Map gallery|Notes( and (citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns – sister cities)$/i)) {
                 e.closest('section')?.remove();
             }
@@ -316,7 +312,6 @@ for (let i = 0; i < files.length; i++) {
         const atts = [
             'data-mw-section-id',
             'about',
-            //'style',
             'title',
             'alt',
             'usemap',
@@ -574,6 +569,6 @@ for (const img of images) {
     }
 }
 
-fs.writeFileSync('unmatched-images', JSON.stringify(unmatched, undefined, 2));
+fs.writeFileSync('index/unmatched-images.json', JSON.stringify(unmatched, undefined, 2));
 
 })();
