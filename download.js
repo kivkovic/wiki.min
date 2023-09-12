@@ -48,19 +48,7 @@ const specialEncode = (s) => {
                 const html = await page.mobileHtml();
                 const doc = nodeHTMLParser.parse(html);
 
-                const discardableSections = /^(Bibliography|Citations|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i;
-                const possibleDiscardableSections = /^(Sources|Other|Literature)$/;
-
-                Array.from(doc.querySelectorAll('h2')).forEach((h2, i, a) => {
-                    if ((h2.id || '').match(discardableSections) || ((h2.id || '').match(possibleDiscardableSections) && i >= a.length - 3)) {
-                        const block = h2.closest('section');
-                        if (block) {
-                            block.remove();
-                        }
-                    }
-                });
-
-                Array.from(doc.querySelectorAll('sup.reference,script,style,meta,link')).map(e => e.remove());
+                Array.from(doc.querySelectorAll('script,style,meta,link')).map(e => e.remove());
 
                 const head = doc.querySelector('head');
                 page.redirects.map(alttitle => {
