@@ -90,12 +90,12 @@ function decode(string) {
             return 1;
         }));
 
+        await new Promise(r => setTimeout(r, 500));
+
         const realEnd = +new Date();
         const fullDuration = (realEnd - start) / 1000;
         timeSum += fullDuration;
         count++;
-
-        await new Promise(r => setTimeout(r, 1000));
 
         if (consecutiveErrors >= 10) {
             console.log('terminating after 10 errors');
