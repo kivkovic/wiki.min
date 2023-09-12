@@ -172,7 +172,7 @@ for (let i = 0; i < files.length; i++) {
     }
 
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
+    //console.log(`${f}, ${i + 1}/${files.length}, ETA ${rem}h`)
 
     const start = +new Date();
 
@@ -488,8 +488,14 @@ for (let i = 0; i < files.length; i++) {
 
             if (allTitles.has(title)) {
                 const hash = (href.match(/(#.+)$/) || [])[1] || '';
-                const realHref = allTitlesReverse.get(title).replace(/\.html$/,'');
-                e.setAttribute('href', realHref + hash);
+
+                if (!allTitlesReverse.has(title)) { // amibuous link, this should be very rare
+                    e.replaceWith(e.innerHTML);
+
+                } else {
+                    const realHref = allTitlesReverse.get(title).replace(/\.html$/,'');
+                    e.setAttribute('href', realHref + hash);
+                }
 
             } else {
                 let title2 = specialDecode(title);
@@ -498,19 +504,12 @@ for (let i = 0; i < files.length; i++) {
                 } catch (e) { }
 
                 if (title2 && allTitles.has(title2)) {
-                    //console.log(2)
                     const hash = (href.match(/(#.+)$/) || [])[1] || '';
                     const realHref = (allTitlesReverse.get(title2) ?? allTitlesReverse.get(specialEncode(title2))).replace(/\.html$/,'');
                     e.setAttribute('href', realHref + hash);
 
                 } else {
-                    /*const title3 = e.innerHTML.trim().toLowerCase();
-                    if (allTitles.has(title3)) {
-                        console.log(3, title3)
-                        e.setAttribute('href', title3);
-                    } else {*/
-                        e.replaceWith(e.innerHTML);
-                    //}
+                    e.replaceWith(e.innerHTML);
                 }
 
             }
@@ -520,6 +519,7 @@ for (let i = 0; i < files.length; i++) {
             await createNewZip();
             zipHash = fHash;
             zipFile = new JSZip();
+            console.log(`${i + 1}/${files.length}, ETA ${rem}h`)
         }
         zipFile.file(f, container.innerHTML);
 
