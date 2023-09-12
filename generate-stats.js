@@ -54,20 +54,10 @@ for (let i = 0; i < files.length; i++) {
 
         if (!comma) comma = true;
 
-        doc.querySelectorAll('img').forEach((e,i) => {
-            const src = e.getAttribute('src');
-            if (!images_all[src]) {
-                images_all[src] = { c: 0, s: 0, i: 0 };
-            }
-            images_all[src].c++;
-            images_all[src].s += Math.max(1, 10 - i);
-            if (!images_all[src].i && e.closest('.infobox')) {
-                images_all[src].i = 1;
-            }
-        });
+        doc.querySelectorAll('[src],[data-src]').forEach((e,i) => {
 
-        doc.querySelectorAll('[data-src]').forEach((e,i) => {
-            const src = e.getAttribute('data-src');
+            const src = e.getAttribute('src') || e.getAttribute('data-src');
+
             if (!src.match(/\.(png|jpe?g|gif|webp|svg)/)) return;
 
             if (!images_all[src]) {
@@ -87,16 +77,12 @@ for (let i = 0; i < files.length; i++) {
                 links_all[src] = { c: 0, s: 0, i: 0 };
             }
             links_all[src].c++;
-            links_all[src].s += 1;
             if (!links_all[src].i && e.closest('.infobox')) {
-                links_all[src].i = 1;
+                links_all[src].i++;
             }
-        });
-
-        doc.querySelector('section').querySelectorAll('a[href]').forEach((e,i) => {
-            const src = e.getAttribute('href').replace(/^\.\//,'').replace(/#.+$/,'');;
-            if (src.indexOf(':') != -1 || src.indexOf('/') != -1) return;
-            links_all[src].s += 10;
+            if (e.closest('section[data-mw-section-id="0"]')) {
+                links_all[src].s++;
+            }
         });
 
         fs.closeSync(t);
