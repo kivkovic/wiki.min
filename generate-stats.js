@@ -1,6 +1,10 @@
 const nodeHTMLParser = require('node-html-parser');
 const fs = require('fs');
 
+if (!fs.existsSync('index/')) {
+    fs.mkdirSync('index/');
+}
+
 const stats_images = fs.openSync('index/images.json', 'w');
 const stats_links = fs.openSync('index/links.json', 'w');
 const stats_redirects = fs.openSync('index/redirects.json', 'w');
