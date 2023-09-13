@@ -536,7 +536,7 @@ for (let i = 0; i < files.length; i++) {
 
         const citationsHTML = Object.keys(citations).filter(k => citations[k].matched).sort().map(k => `<li id="${k}">${citations[k].content}</li>`).join('\n');
         if (citationsHTML) {
-            container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol>${citationsHTML}</ol>`);
+            container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol class="refs-list">${citationsHTML}</ol>`);
         }
 
         if (zipHash != fHash) {

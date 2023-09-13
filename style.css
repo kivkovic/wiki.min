@@ -879,3 +879,17 @@ table.clade:hover span.linkB {
 img[src="i/Interactive_icon.webp"] {
   display: none;
 }
+
+.refs-list {
+  counter-reset: item;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.refs-list li:before {
+  list-style-type: decimal;
+  display: inline-block;
+  content: "[" counter(item) "] ";
+  counter-increment: item;
+  margin-right: 0.35em;
+}
