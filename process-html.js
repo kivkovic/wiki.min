@@ -292,10 +292,10 @@ for (let i = 0; i < files.length; i++) {
         });
 
         // .pcs-edit-section-title
-        const discardableSections = /^(See Also|Bibliography|Sources|Other|Literature|Bibliography|General References|Citations|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i;
+        const discardableSections = /^(See Also|Bibliography|Sources|Other|Literature|Bibliography|General References|Citations|(Notes|References|Sources|Citations) and (notes|references|sources|citations)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)|Map gallery|Notes( and(citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns.+sister_cities)$/i;
 
         Array.from(container.querySelectorAll('h2')).slice(-4).forEach((h2) => {
-            if ((h2.id || '').match(discardableSections)) {
+            if (h2.innerText.match(discardableSections)) {
                 const block = h2.closest('section');
                 block.remove();
             }
