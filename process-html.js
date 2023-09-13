@@ -314,7 +314,7 @@ for (let i = 0; i < files.length; i++) {
         });
 
         container.querySelectorAll('sup.reference').forEach(e => {
-            const refNum = e.innerText.match(/\[\d+\]/) ? (e.getAttribute('id')?.match(/cite_ref-(\d+)/)||[])[1] : null;
+            const refNum = e.innerText.match(/\[\d+\]/) ? (e.getAttribute('id')?.match(/cite_ref-(.+)/)||[])[1] : null;
             if (refNum != null) {
                 const id = e.querySelector('[href]').getAttribute('href').replace(/^.*#/, '');
                 const citation = citations[id];
