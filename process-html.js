@@ -254,6 +254,15 @@ for (let i = 0; i < files.length; i++) {
             target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
+        const citations = {};
+
+        container.querySelectorAll('.mw-reference-text').forEach(e => {
+            const id = e.parentNode.closest('[id]')?.id;
+            if (id) {
+                citations[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+            }
+        });
+
         const remove = [
             'link',
             'script',
@@ -275,22 +284,20 @@ for (let i = 0; i < files.length; i++) {
             '.hidden-begin',
             '.portalbox',
             '.navbar',
-            'sup.reference',
+            //'sup.reference',
         ];
 
         container.querySelectorAll(remove.join(',')).forEach(e => {
             e.remove();
         });
 
-        const discardableSections = /^(Bibliography|Citations|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i;
-        const possibleDiscardableSections = /^(Sources|Other|Literature)$/;
+        // .pcs-edit-section-title
+        const discardableSections = /^(See Also|Bibliography|Sources|Other|Literature|Bibliography|General References|Citations|(Notes|References|Sources|Citations)_and_(notes|references|sources|citations)|External_links|Explanatory_notes|Fictional_portrayals|Footnotes|Further_reading|In_(popular_)?(culture|fiction|literature|media)(_.+)?|Map_gallery|Notes(_and(citations|references))?|Philanthropy|Popular_culture|References(_in_popular.+)?|Trivia|Twin_towns|Sister_cities|Twin_towns_–_sister_cities)$/i;
 
-        Array.from(container.querySelectorAll('h2')).forEach((h2, i, a) => {
-            if ((h2.id || '').match(discardableSections) || ((h2.id || '').match(possibleDiscardableSections) && i >= a.length - 3)) {
+        Array.from(container.querySelectorAll('h2')).slice(-4).forEach((h2) => {
+            if ((h2.id || '').match(discardableSections)) {
                 const block = h2.closest('section');
-                if (block) {
-                    block.remove();
-                }
+                block.remove();
             }
         });
 
@@ -306,9 +313,19 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        container.querySelectorAll('.pcs-edit-section-title').forEach((e, i) => {
-            if (i > 0 && e.innerText.trim().match(/^(See Also|Bibliography|Citations|General References|(Notes|References|Sources|Citations) and (notes|references|sources|citations|further reading)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)( .+)?|Map gallery|Notes( and (citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns – sister cities)$/i)) {
-                e.closest('section')?.remove();
+        container.querySelectorAll('sup.reference').forEach(e => {
+            const refNum = e.innerText.match(/\[\d+\]/) ? (e.getAttribute('id')?.match(/cite_ref-(\d+)/)||[])[1] : null;
+            if (refNum != null) {
+                const id = e.querySelector('[href]').getAttribute('href').replace(/^.*#/, '');
+                const citation = citations[id];
+                if (citation) {
+                    citation.matched = true;
+                    e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${id}">[${refNum}]</a></sup>`);
+                } else {
+                    e.remove()
+                }
+            } else {
+                e.remove();
             }
         });
 
@@ -336,6 +353,7 @@ for (let i = 0; i < files.length; i++) {
 
         for (const a of atts) {
             container.querySelectorAll('[' + a + ']').forEach(e => {
+                if (a == 'title' && e.tagName == 'SUP') return;
                 e.removeAttribute(a);
             });
         }
@@ -481,7 +499,10 @@ for (let i = 0; i < files.length; i++) {
         });
 
         container.querySelectorAll('a[href]').forEach(e => {
-            const href = e.getAttribute('href').replace(/^\.\//, '').replace(/_/g, ' ');
+            const hrefAtt = e.getAttribute('href');
+            if (hrefAtt.match(/^#.+$/)) return;
+
+            const href = hrefAtt.replace(/^\.\//, '').replace(/_/g, ' ');
             const title = specialEncode(href.replace(/#.*$/, '').toLowerCase()).replace(/\.html$/, '');
 
             if (allTitles.has(title)) {
@@ -512,6 +533,11 @@ for (let i = 0; i < files.length; i++) {
 
             }
         });
+
+        const citationsHTML = Object.keys(citations).filter(k => citations[k].matched).sort().map(k => `<li id="${k}">${citations[k].content}</li>`).join('\n');
+        if (citationsHTML) {
+            container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol>${citationsHTML}</ol>`);
+        }
 
         if (zipHash != fHash) {
             await createNewZip();

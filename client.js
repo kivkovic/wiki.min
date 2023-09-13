@@ -104,6 +104,11 @@ function jumpToSection(name) {
 
 async function loadPage(linkInput, clearSearch = true) {
 
+    if (linkInput.indexOf('#') == 0) {
+        document.querySelector(linkInput)?.scrollIntoView();
+        return;
+    }
+
     const container = document.querySelector('#content');
 
     if (!linkInput) {
