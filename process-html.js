@@ -263,6 +263,13 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
+        container.querySelectorAll('cite').forEach(e => {
+            const id = e.closest('[id]')?.id;
+            if (id) {
+                citations[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+            }
+        });
+
         const remove = [
             'link',
             'script',
@@ -322,10 +329,22 @@ for (let i = 0; i < files.length; i++) {
                     citation.matched = true;
                     e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${id}">[${refNum}]</a></sup>`);
                 } else {
-                    e.remove()
+                    e.remove();
                 }
             } else {
                 e.remove();
+            }
+        });
+
+        container.querySelectorAll('a[href]').forEach(e => {
+            const href = e.getAttribute('href');
+            if (href.match(/#cite/i)) {
+                const id = href.split('#')[1];
+                const citation = citations[id];
+                if (citation) {
+                    citation.matched = true;
+                    e.setAttribute('href', '#' + id);
+                }
             }
         });
 
