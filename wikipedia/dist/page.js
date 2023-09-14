@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.citation = exports.pdf = exports.mobileHtml = exports.media = exports.related = exports.summary = exports.rawInfo = exports.tables = exports.infobox = exports.langLinks = exports.coordinates = exports.references = exports.links = exports.categories = exports.content = exports.html = exports.intro = exports.images = exports.Page = void 0;
+exports.citation = exports.pdf = exports.mobileHtml = exports.desktopHtml = exports.media = exports.related = exports.summary = exports.rawInfo = exports.tables = exports.infobox = exports.langLinks = exports.coordinates = exports.references = exports.links = exports.categories = exports.content = exports.html = exports.intro = exports.images = exports.Page = void 0;
 const errors_1 = require("./errors");
 const request_1 = require("./request");
 const utils_1 = require("./utils");
@@ -347,6 +347,22 @@ class Page {
                 throw new errors_1.htmlError(error);
             }
         };
+
+
+        /* * * * * custom * * * * */
+        this.desktopHtml = async (pageOptions) => {
+            try {
+                if (!this._desktopHtml) {
+                    const result = await (0, exports.desktopHtml)(this.title, pageOptions === null || pageOptions === void 0 ? void 0 : pageOptions.redirect);
+                    this._desktopHtml = result;
+                }
+                return this._desktopHtml;
+            }
+            catch (error) {
+                throw new errors_1.htmlError(error);
+            }
+        };
+
         /**
          * Returns pdf of a given page
          *
@@ -822,6 +838,20 @@ const mobileHtml = async (title, redirect = true) => {
     }
 };
 exports.mobileHtml = mobileHtml;
+
+/* * * * * custom * * * * */
+const desktopHtml = async (title, redirect = true) => {
+    try {
+        const path = `page/html/${title.replace(/\&/g, '%26').replace(/\+/g, '%2B').replace(/\//g, '%2F')}`;
+        const result = await (0, request_1.makeRestRequest)(path, redirect);
+        return result;
+    }
+    catch (error) {
+        throw new errors_1.htmlError(error);
+    }
+};
+exports.desktopHtml = desktopHtml;
+
 /**
  * Returns pdf of a given page
  *

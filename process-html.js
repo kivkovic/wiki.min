@@ -193,20 +193,26 @@ for (let i = 0; i < files.length; i++) {
 
     try {
 
+        console.log(0, f);
+
         const t = fs.openSync('html/' + f, 'r');
         const html = fs.readFileSync(t);
         const doc = nodeHTMLParser.parse(html);
         fs.closeSync(t);
 
+        //const container = doc.querySelector('#pcs');
+        const container = doc.querySelector('body');
 
-        const container = doc.querySelector('#pcs');
-        if (!container) continue;
-
-        container.querySelectorAll('*[style]').forEach(e => {
+        /*container.querySelectorAll('*[style]').forEach(e => {
             const style = e.getAttribute('style');
             if (style?.length) {
                 e.setAttribute('style', style.replace(/display: *none;?/, ''));
             }
+        });*/
+
+        container.querySelectorAll('.navbox').forEach(e => {
+            // TODO: should probably come up with a heuristic to keep navbox if most links in it are present...?
+            e.remove();
         });
 
         container.querySelectorAll('[src]').forEach(e => {
@@ -367,7 +373,8 @@ for (let i = 0; i < files.length; i++) {
             e.remove();
         });
 
-        Array.from(container.querySelectorAll('section > .pcs-edit-section-header > h2.pcs-edit-section-title')).slice(-4).forEach((h2) => {
+        //Array.from(container.querySelectorAll('section > .pcs-edit-section-header > h2.pcs-edit-section-title')).slice(-4).forEach((h2) => {
+        Array.from(container.querySelectorAll('section > h2')).slice(-4).forEach((h2) => {
             if (h2.innerText.trim().match(discardableSections)) {
                 const block = h2.closest('section');
                 block.remove();

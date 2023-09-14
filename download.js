@@ -59,7 +59,8 @@ function decode(string) {
             try {
                 const url = specialEncode(title).replace(/%/g, '%25');
                 const page = await wiki.page(url);
-                const html = await page.mobileHtml();
+                const html = await page.desktopHtml();
+
                 const doc = nodeHTMLParser.parse(html);
 
                 Array.from(doc.querySelectorAll('script,style,meta,link')).map(e => e.remove());
