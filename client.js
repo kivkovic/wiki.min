@@ -156,8 +156,13 @@ async function loadPage(linkInput, clearSearch = true) {
 function setLinks(elements) {
     elements.forEach(a => {
         a.addEventListener('click', (e) => {
+            const href = e.target.getAttribute('href');
+            if (href.match(/^https?:\/\//i)) {
+                return true;
+            }
+
             e.preventDefault();
-            loadPage(e.target.getAttribute('href'));
+            loadPage(href);
             return false;
         });
     });
