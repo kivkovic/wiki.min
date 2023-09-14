@@ -884,6 +884,7 @@ img[src="i/Interactive_icon.webp"] {
   counter-reset: item;
   list-style-type: none;
   padding-left: 0;
+  font-size: 14px;
 }
 
 .refs-list li:before {

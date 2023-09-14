@@ -597,7 +597,7 @@ for (let i = 0; i < files.length; i++) {
             .filter(k => citationsMerged[k].matched)
             .map(k => `<li id="${k}">${citationsMerged[k].content}</li>`).join('\n');
         if (citationsHTML) {
-            container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol class="refs-list">${citationsHTML}</ol>`);
+            container.insertAdjacentHTML('beforeend', `<hr><h3>Notes and References</h3><ol class="refs-list">${citationsHTML}</ol>`);
         }
 
         if (zipHash != fHash) {
