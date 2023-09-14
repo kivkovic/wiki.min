@@ -158,6 +158,18 @@ const closestImgParent = (e, debug) => {
 
 let dups = 0;
 
+const discardableSections = new RegExp(`^${[
+    '((additional|literary|primary|secondary|external|other|general|explanatory|other|cited) )?(sources|notes|references|citations?)( and .+)?',
+    'further (reading|references|information)( and .+)?',
+    'general .+(references|bibligraphy|sources)',
+    'external (links|sources)( and .+)?',
+    'notes,.+(references|sources)',
+    'see also',
+    'footnotes.*',
+    'works cited',
+    '(twin|sister) (cities|towns).*',
+].map(s => `(${s})`).join('|')}$`, 'i');
+
 (async function () {
 
 let zipFile;
@@ -184,8 +196,8 @@ for (let i = 0; i < files.length; i++) {
         const t = fs.openSync('html/' + f, 'r');
         const html = fs.readFileSync(t);
         const doc = nodeHTMLParser.parse(html);
-
         fs.closeSync(t);
+
 
         const container = doc.querySelector('#pcs');
         if (!container) continue;
@@ -263,10 +275,39 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        container.querySelectorAll('cite').forEach(e => {
-            const id = e.closest('[id]')?.id;
-            if (id) {
-                citations[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+        let refNum = 1;
+        container.querySelectorAll('sup.reference').forEach(e => {
+            const link = e.querySelector('[href]');
+            if (!link) return;
+
+            const ref = e.innerText.match(/\[.*\d+\]/) ? (e.getAttribute('id')?.match(/cite_(ref|note)-(.+)/)||[])[1] : null;
+            if (ref != null) {
+                const id = e.querySelector('[href]').getAttribute('href').replace(/^.*#/, '');
+                const citation = citations[id];
+                if (citation) {
+                    citation.matched = true;
+                    if (!citation.refNum) {
+                        citation.refNum = refNum;
+                        refNum++;
+                    }
+                    e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${id}">[${citation.refNum}]</a></sup>`);
+                } else {
+                    e.remove();
+                }
+            } else {
+                e.remove();
+            }
+        });
+
+        container.querySelectorAll('a[href]').forEach(e => {
+            const href = e.getAttribute('href');
+            if (href.match(/#cite/i)) {
+                const id = href.split('#')[1];
+                const citation = citations[id];
+                if (citation) {
+                    citation.matched = true;
+                    e.setAttribute('href', '#' + id);
+                }
             }
         });
 
@@ -298,11 +339,8 @@ for (let i = 0; i < files.length; i++) {
             e.remove();
         });
 
-        // .pcs-edit-section-title
-        const discardableSections = /^(See Also|Bibliography|Sources|Other|Literature|Bibliography|General References|Citations|(Notes|References|Sources|Citations) and (notes|references|sources|citations)|External links|Explanatory notes|Fictional portrayals|Footnotes|Further reading|In (popular )?(culture|fiction|literature|media)|Map gallery|Notes( and(citations|references))?|Philanthropy|Popular culture|References( in popular.+)?|Trivia|Twin towns|Sister cities|Twin towns.+sister_cities)$/i;
-
-        Array.from(container.querySelectorAll('h2')).slice(-4).forEach((h2) => {
-            if (h2.innerText.match(discardableSections)) {
+        Array.from(container.querySelectorAll('section > .pcs-edit-section-header > h2.pcs-edit-section-title')).slice(-4).forEach((h2) => {
+            if (h2.innerText.trim().match(discardableSections)) {
                 const block = h2.closest('section');
                 block.remove();
             }
@@ -316,34 +354,6 @@ for (let i = 0; i < files.length; i++) {
                     e.parentNode.remove();
                 } else {
                     e.remove();
-                }
-            }
-        });
-
-        container.querySelectorAll('sup.reference').forEach(e => {
-            const refNum = e.innerText.match(/\[\d+\]/) ? (e.getAttribute('id')?.match(/cite_ref-(.+)/)||[])[1] : null;
-            if (refNum != null) {
-                const id = e.querySelector('[href]').getAttribute('href').replace(/^.*#/, '');
-                const citation = citations[id];
-                if (citation) {
-                    citation.matched = true;
-                    e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${id}">[${refNum}]</a></sup>`);
-                } else {
-                    e.remove();
-                }
-            } else {
-                e.remove();
-            }
-        });
-
-        container.querySelectorAll('a[href]').forEach(e => {
-            const href = e.getAttribute('href');
-            if (href.match(/#cite/i)) {
-                const id = href.split('#')[1];
-                const citation = citations[id];
-                if (citation) {
-                    citation.matched = true;
-                    e.setAttribute('href', '#' + id);
                 }
             }
         });
@@ -553,7 +563,10 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        const citationsHTML = Object.keys(citations).filter(k => citations[k].matched).sort().map(k => `<li id="${k}">${citations[k].content}</li>`).join('\n');
+        const citationsHTML = Object.keys(citations)
+            .sort((a, b) => citations[a].refNum - citations[b].refNum)
+            .filter(k => citations[k].matched)
+            .map(k => `<li id="${k}">${citations[k].content}</li>`).join('\n');
         if (citationsHTML) {
             container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol class="refs-list">${citationsHTML}</ol>`);
         }
