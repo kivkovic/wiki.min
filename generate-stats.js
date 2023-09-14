@@ -9,16 +9,13 @@ const stats_images = fs.openSync('index/images.json', 'w');
 const stats_links = fs.openSync('index/links.json', 'w');
 const stats_redirects = fs.openSync('index/redirects.json', 'w');
 
-fs.writeFileSync(stats_images, '{\n');
-fs.writeFileSync(stats_links, '{\n');
-fs.writeFileSync(stats_redirects, '{\n');
-
 let timeSum = 1;
 let count = 1;
 const files = fs.readdirSync('./html');
 
 const images_all = {};
 const links_all = {};
+const redirects = [];
 
 let comma = false;
 
@@ -27,7 +24,7 @@ for (let i = 0; i < files.length; i++) {
 
     if (!f.match(/\.html$/) || f == 'index.html') continue;
     const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${f}, ${i+1}/${files.length}, ETA ${rem}h`) ///////////////
+    console.log(`${i+1}/${files.length}, ETA ${rem}h`);
 
     const start = +new Date();
 
@@ -35,6 +32,7 @@ for (let i = 0; i < files.length; i++) {
 
         const t = fs.openSync('html/' + f, 'r');
         const html = fs.readFileSync(t);
+        fs.closeSync(t);
 
         const doc = nodeHTMLParser.parse(html);
 
@@ -46,15 +44,13 @@ for (let i = 0; i < files.length; i++) {
         const redirectsLC = redirects1.map(r => r.toLowerCase());
         const redirects2 = redirects1.filter((v,i,a) => redirectsLC.indexOf(v.toLowerCase()) == i);
 
-        //const redirects3 = redirects2.filter(r => r.toLowerCase().replace(/[^a-z0-9.\-]/gi, '') != title.toLowerCase().replace(/[^a-z0-9.\-]/gi, ''));
-
         const descElem = doc.querySelector('#pcs-edit-section-title-description');
         const addDescElemt = doc.querySelector('#pcs-edit-section-add-title-description');
 
         const description = addDescElemt && !descElem ? '' : descElem.innerText.trim();
 
         const list = JSON.stringify({ [f]: [title].concat(redirects2).concat({d:description}) }).slice(1,-1);
-        fs.writeFileSync(stats_redirects, (comma ? ',' : '') + '\n' + list);
+        redirects.push(list);
 
         if (!comma) comma = true;
 
@@ -70,13 +66,14 @@ for (let i = 0; i < files.length; i++) {
             images_all[src].c++;
             images_all[src].s += Math.max(1, 10 - i);
             if (!images_all[src].i && e.closest('.infobox')) {
-                images_all[src].i = 1;
+                images_all[src].i++;
             }
         });
 
         doc.querySelectorAll('a[href]').forEach((e,i) => {
             const src = e.getAttribute('href').replace(/^\.\//,'').replace(/#.+$/,'');
             if (src.indexOf(':') != -1 || src.indexOf('/') != -1) return;
+
             if (!links_all[src]) {
                 links_all[src] = { c: 0, s: 0, i: 0 };
             }
@@ -89,8 +86,6 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        fs.closeSync(t);
-
     } catch (e) {
         console.log(e);
         console.log(f);
@@ -102,9 +97,9 @@ for (let i = 0; i < files.length; i++) {
     count++;
 }
 
-fs.writeFileSync(stats_redirects, '\n}');
-fs.writeFileSync(stats_images, Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
-fs.writeFileSync(stats_links, Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+fs.writeFileSync(stats_redirects, '{\n' + redirects.join(',\n') + '\n}\n');
+fs.writeFileSync(stats_images, '{\n' + Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+fs.writeFileSync(stats_links, '{\n' + Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
 
 fs.closeSync(stats_images);
 fs.closeSync(stats_links);
