@@ -267,11 +267,37 @@ for (let i = 0; i < files.length; i++) {
         });
 
         const citations = {};
+        const citationsIndirect = {};
+        const citationsIndirectMap = {};
+
+        container.querySelectorAll('cite.citation').forEach(e => {
+            const id = e.getAttribute('id');
+            citationsIndirect[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+        });
 
         container.querySelectorAll('.mw-reference-text').forEach(e => {
             const id = e.parentNode.closest('[id]')?.id;
+            let redirect = false;
             if (id) {
-                citations[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+                e.querySelectorAll('a').forEach(a => {
+                    const h = a.getAttribute('href');
+                    if (h.indexOf('//') == 0) {
+                        a.setAttribute('href', 'https:' + h);
+                    } else if (h.indexOf('./') == 0) { // on rare occasions reference texts have wiki links inside, just remove them
+                        const indirect = (h.match(/#(CITEREF.+)/i)||[])[1]; // this is a note pointing to a reference...
+                        if (indirect) {
+                            citationsIndirectMap[id] = indirect;
+                            redirect = true;
+                            return;
+
+                        } else {
+                            a.replaceWith(a.innerText);
+                        }
+                    }
+                });
+                if (!redirect) {
+                    citations[id] = { content: e.innerHTML, text: e.innerText, matched: false };
+                }
             }
         });
 
@@ -283,14 +309,16 @@ for (let i = 0; i < files.length; i++) {
             const ref = e.innerText.match(/\[.*\d+\]/) ? (e.getAttribute('id')?.match(/cite_(ref|note)-(.+)/)||[])[1] : null;
             if (ref != null) {
                 const id = e.querySelector('[href]').getAttribute('href').replace(/^.*#/, '');
-                const citation = citations[id];
+                const indirect = citationsIndirectMap[id];
+                const citation = indirect ? citationsIndirect[indirect] : citations[id];
+
                 if (citation) {
                     citation.matched = true;
                     if (!citation.refNum) {
                         citation.refNum = refNum;
                         refNum++;
                     }
-                    e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${id}">[${citation.refNum}]</a></sup>`);
+                    e.replaceWith(`<sup title="${citation.text.replace(/"/g,'&quot;')}"><a href="#${indirect ?? id}">[${citation.refNum}]</a></sup>`);
                 } else {
                     e.remove();
                 }
@@ -563,10 +591,11 @@ for (let i = 0; i < files.length; i++) {
             }
         });
 
-        const citationsHTML = Object.keys(citations)
-            .sort((a, b) => citations[a].refNum - citations[b].refNum)
-            .filter(k => citations[k].matched)
-            .map(k => `<li id="${k}">${citations[k].content}</li>`).join('\n');
+        const citationsMerged = { ...citations, ...citationsIndirect };
+        const citationsHTML = Object.keys(citationsMerged)
+            .sort((a, b) => citationsMerged[a].refNum - citationsMerged[b].refNum)
+            .filter(k => citationsMerged[k].matched)
+            .map(k => `<li id="${k}">${citationsMerged[k].content}</li>`).join('\n');
         if (citationsHTML) {
             container.insertAdjacentHTML('beforeend', `<hr><h3>References</h3><ol class="refs-list">${citationsHTML}</ol>`);
         }
