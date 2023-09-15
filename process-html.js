@@ -211,7 +211,7 @@ for (let i = 0; i < files.length; i++) {
             }
         });*/
 
-        container.querySelectorAll('.navbox').forEach(e => {
+        container.querySelectorAll('.navbox,.sidebar').forEach(e => {
             // TODO: should probably come up with a heuristic to keep navbox if most links in it are present...?
             e.remove();
         });
