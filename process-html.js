@@ -112,8 +112,11 @@ const getimgsrc = (inputpath) => {
     }
 
     const path = inputpath.replace(/[?#].*$/,'');
-    const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
-    const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '');
+    const filename = path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
+    //const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
+    //const basename = filename.length < 240 ? basename : basename.slice(0,240);
+    //const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '');
+    const mainanme = filename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '').slice(0,240);
 
     const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
 
@@ -192,8 +195,6 @@ for (let i = 0; i < files.length; i++) {
     lastFile = f;
 
     try {
-
-        console.log(0, f);
 
         const t = fs.openSync('html/' + f, 'r');
         const html = fs.readFileSync(t);

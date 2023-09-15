@@ -30,7 +30,7 @@ const outdir = 'i/';
                 .toFile(outdir + name + '.webp');
 
         } catch (e) {
-            console.log('ERROR', 'images/' + name)
+            console.log('ERROR', inputDir + '/' + name)
             console.log(e);
             process.exit(1);
         }
