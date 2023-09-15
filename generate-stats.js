@@ -44,12 +44,12 @@ for (let i = 0; i < files.length; i++) {
         const redirectsLC = redirects1.map(r => r.toLowerCase());
         const redirects2 = redirects1.filter((v,i,a) => redirectsLC.indexOf(v.toLowerCase()) == i);
 
-        const descElem = doc.querySelector('#pcs-edit-section-title-description');
-        const addDescElemt = doc.querySelector('#pcs-edit-section-add-title-description');
+        //const descElem = doc.querySelector('#pcs-edit-section-title-description');
+        //const addDescElemt = doc.querySelector('#pcs-edit-section-add-title-description');
+        //const description = addDescElemt && !descElem ? '' : descElem.innerText.trim();
+        const description = doc.querySelector('.shortdescription')?.innerText;
 
-        const description = addDescElemt && !descElem ? '' : descElem.innerText.trim();
-
-        const list = JSON.stringify({ [f]: [title].concat(redirects2).concat({d:description}) }).slice(1,-1);
+        const list = JSON.stringify({ [f]: [title].concat(redirects2).concat(description ? {d:description} : []) }).slice(1,-1);
         redirects.push(list);
 
         if (!comma) comma = true;
@@ -75,11 +75,14 @@ for (let i = 0; i < files.length; i++) {
             if (src.indexOf(':') != -1 || src.indexOf('/') != -1) return;
 
             if (!links_all[src]) {
-                links_all[src] = { c: 0, s: 0, i: 0 };
+                links_all[src] = { c: 0, s: 0, i: 0, n: 0 };
             }
             links_all[src].c++;
             if (!links_all[src].i && e.closest('.infobox')) {
                 links_all[src].i++;
+            }
+            if (e.closest('.navbox')) {
+                links_all[src].n++;
             }
             if (e.closest('section[data-mw-section-id="0"]')) {
                 links_all[src].s++;
