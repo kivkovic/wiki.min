@@ -211,6 +211,8 @@ for (let i = 0; i < files.length; i++) {
             }
         });*/
 
+        container.insertAdjacentHTML('afterbegin', `<h1>${doc.querySelector('title').innerHTML}</h1>${container.querySelector('.shortdescription')?.innerHTML||''}<hr>`)
+
         container.querySelectorAll('.navbox,.sidebar').forEach(e => {
             // TODO: should probably come up with a heuristic to keep navbox if most links in it are present...?
             e.remove();
@@ -375,7 +377,7 @@ for (let i = 0; i < files.length; i++) {
         });
 
         //Array.from(container.querySelectorAll('section > .pcs-edit-section-header > h2.pcs-edit-section-title')).slice(-4).forEach((h2) => {
-        Array.from(container.querySelectorAll('section > h2')).slice(-4).forEach((h2) => {
+        Array.from(container.querySelectorAll('section > h2')).slice(-5).forEach((h2) => {
             if (h2.innerText.trim().match(discardableSections)) {
                 const block = h2.closest('section');
                 block.remove();
