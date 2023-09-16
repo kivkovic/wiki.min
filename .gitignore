@@ -5,8 +5,9 @@ images/*
 old-files/*
 w/*
 i/*
+i0/*
+i1/*
 log
 testList
-.vscode/*
 .DS_Store
 search-index.json
