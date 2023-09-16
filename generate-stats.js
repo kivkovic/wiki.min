@@ -56,16 +56,17 @@ for (let i = 0; i < files.length; i++) {
 
         doc.querySelectorAll('[src],[data-src]').forEach((e,i) => {
 
+
             const src = e.getAttribute('src') || e.getAttribute('data-src');
 
-            if (!src.match(/\.(png|jpe?g|gif|webp|svg)/)) return;
+            if (!src.match(/\.(png|jpe?g|gif|webp|svg)/i)) return;
 
             if (!images_all[src]) {
                 images_all[src] = { c: 0, s: 0, i: 0 };
             }
             images_all[src].c++;
             images_all[src].s += Math.max(1, 10 - i);
-            if (!images_all[src].i && e.closest('.infobox')) {
+            if (e.closest('.infobox')) {
                 images_all[src].i++;
             }
         });
