@@ -887,10 +887,17 @@ img[src="i/Interactive_icon.webp"] {
   font-size: 14px;
 }
 
-.refs-list li:before {
+.refs-list > li:before {
   list-style-type: decimal;
   display: inline-block;
   content: "[" counter(item) "] ";
   counter-increment: item;
   margin-right: 0.35em;
+}
+
+.refs-list > li ul { /* nested ul */
+  list-style-type: none;
+  display: inline-block;
+  padding-left: 0;
+  height: 18px; /* resets ul height to auto */
 }
