@@ -1,13 +1,16 @@
 const sharp = require('sharp');
 const fs = require('fs');
 
-const files = fs.readdirSync('images').filter(f => f.match(/\.(jpe?g|png|gif|webp|tiff?|svg)$/i));
+const files = fs.readdirSync('id').filter(f => f.match(/\.(jpe?g|png|gif|webp|tiff?|svg)$/i));
 
-if (!fs.existsSync('i/')) {
-    fs.mkdirSync('i');
+const indir = 'id/'
+const outdir = 'io/';
+
+
+if (!fs.existsSync(outdir)) {
+    fs.mkdirSync(outdir);
 }
 
-const outdir = 'i/';
 
 (async function () {
 
@@ -24,15 +27,15 @@ const outdir = 'i/';
 
         try {
 
-            await sharp('images/' + nameIn, { animated: true })
+            await sharp(indir + nameIn, { animated: true })
                 .resize(640, 640, { fit: 'inside', withoutEnlargement: true })
                 .webp({ quality: 75 })
                 .toFile(outdir + name + '.webp');
 
         } catch (e) {
-            console.log('ERROR', inputDir + '/' + name)
+            console.log('ERROR', indir + '/' + name)
             console.log(e);
-            process.exit(1);
+            //process.exit(1);
         }
         //break;
     }

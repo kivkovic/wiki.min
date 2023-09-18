@@ -45,7 +45,7 @@ for (const img in images) {
 }
 
 for (const [key, value] of map.entries()) {
-    if (value.count + value.infobox <= 2) {
+    if (value.count <= 2 && !value.infobox) {
         map.delete(key);
         continue;
     }
@@ -57,17 +57,15 @@ for (const [key, value] of map.entries()) {
         console.log(key, value);
         process.exit();
     }
-
-    /*const maxsize = 480;
-    if (value.size > maxsize) {
-        value.url = value.url.replace(new RegExp(`([\/-])${value.size}(px-)`), `$1${maxsize}$2`);
-        value.size = maxsize;
-    }*/
 }
 
-//let existing_same = 0;
-//let existing_smaller = 0;
-//let existing_larger = 0;
+
+for (const [key, value] of map.entries()) {
+    if (fs.existsSync('i/' + key + '.webp')) {
+        map.delete(key);
+    }
+}
+
 (async function () {
 
     for (const [key, value] of map.entries()) {
@@ -75,40 +73,12 @@ for (const [key, value] of map.entries()) {
         const name = key.length < 240 ? key : key.slice(0,240);
         const filename = name + '.webp';
 
-        if (fs.existsSync('i/' + filename) || fs.existsSync('images/' + name + value.extension)) {
-            //console.log('skipping')
+        if (fs.existsSync('i/' + filename) || fs.existsSync('id/' + name + value.extension)) {
             map.delete(key);
         }
-
-        /*if (fs.existsSync('i-old/' + filename)) {
-
-            try {
-                const img = await sharp('i-old/' + filename);
-                const meta = await img.metadata();
-
-                if (meta.width == value.size) {
-                    fs.copyFileSync('i-old/' + filename, 'i/' + filename);
-                    map.delete(key);
-                    existing_same++;
-                } else {
-                    if (meta.width < value.size) {
-                        existing_smaller++;
-                    } else {
-                        existing_larger++;
-                    }
-                    console.log('present:', meta.width, 'new:', value.size);
-                }
-            } catch (e) {
-                console.log('sharp error')
-            }
-        }*/
     }
 
-    //console.log('existing identical images:', existing_same);
-    //console.log('existing smaller images:', existing_smaller);
-    //console.log('existing larger images:', existing_larger);
     console.log('images to download:', map.size);
-    //process.exit()
 
     await new Promise(r => setTimeout(r, 3000));
 
@@ -117,7 +87,7 @@ for (const [key, value] of map.entries()) {
     for (const [key, value] of map.entries()) {
 
         const name = key.length < 240 ? key : key.slice(0,240);
-        const savePath = 'images/' + name + value.extension;
+        const savePath = 'id/' + name + value.extension;
 
         if (fs.existsSync(savePath)) continue;
 
