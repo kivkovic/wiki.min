@@ -141,7 +141,8 @@ img {
 
 .wt>tr>th,
 .wt>*>tr>th {
-  background-color: #eaecf0;
+  /*background-color: #eaecf0;*/
+  background-color: #232526;
   text-align: center;
 }
 
@@ -254,16 +255,17 @@ h3 {
   text-align: left;
   font-size: 90%;
   position: relative;
-  border: 1px solid #eaecf0;
+  border: 1px solid #484e51; /*#eaecf0;*/
   display: flex;
   flex-flow: column nowrap;
-  background-color: #f8f9fa;
+  /*background-color: #f8f9fa;*/
+  background-color: #232526;
 }
 
 .ib td {
   vertical-align: top;
   border: 0;
-  border-bottom: 1px solid #eaecf0;
+  border-bottom: 1px solid #484e51; /*#eaecf0;*/
   padding: 7px 10px;
 }
 
