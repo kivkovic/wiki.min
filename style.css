@@ -14,18 +14,18 @@ body {
   font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Inter", "Helvetica", "Arial", sans-serif;
   margin: 0;
   padding: 16px;
-  background: #131516;
-  color: #d3cfca;
+  color: #131516;
+  background: #fafbfc;
 }
 
 input {
-  background: #131516;
+  color: #131516;
   border-color: #484e51;
-  color: #d3cfca;
+  background: #f8f9fa;
 }
 
 hr {
-  border-color: #484e51;
+  border-color: #777;
 }
 
 ul {
@@ -77,13 +77,9 @@ a:link,
 a:hover,
 a:active,
 a:visited {
-  color: #81a0db;
+  color: #2e61be;
   text-decoration: none;
   background: none;
-}
-
-sup a[href] {
-  color: #7f899b;
 }
 
 ul {
@@ -141,8 +137,7 @@ img {
 
 .wt>tr>th,
 .wt>*>tr>th {
-  /*background-color: #eaecf0;*/
-  background-color: #232526;
+  background-color: #eaecf0;
   text-align: center;
 }
 
@@ -255,17 +250,16 @@ h3 {
   text-align: left;
   font-size: 90%;
   position: relative;
-  border: 1px solid #484e51; /*#eaecf0;*/
+  border: 1px solid #eaecf0;
   display: flex;
   flex-flow: column nowrap;
-  /*background-color: #f8f9fa;*/
-  background-color: #232526;
+  background-color: #f8f9fa;
 }
 
 .ib td {
   vertical-align: top;
   border: 0;
-  border-bottom: 1px solid #484e51; /*#eaecf0;*/
+  border-bottom: 1px solid #eaecf0;
   padding: 7px 10px;
 }
 
