@@ -113,23 +113,20 @@ const getimgsrc = (inputpath) => {
 
     const path = inputpath.replace(/[?#].*$/,'');
     const filename = path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
-    //const basename = path.length >= 250 ? path.slice(0, 245) : path.replace(/(\.[a-z]{3,4})?\.[a-z]{3,4}$/i, '');
-    //const basename = filename.length < 240 ? basename : basename.slice(0,240);
-    //const mainanme = basename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '');
-    const mainanme = filename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '').slice(0,240);
+    const mainname = filename.replace(/^(((lossy|lossless)-)?page\d+-)?\d+px-/i, '').slice(0,240);
 
-    const diskpath = 'i/' + specialEncode(mainanme) + '.webp';
+    const diskpath = 'i/' + specialEncode(mainname) + '.webp';
 
     let exists;
     if (!imgCache.has(diskpath)) {
         exists = fs.existsSync(diskpath);
-        imgCache.set(diskpath, exists);
+        imgCache.set(diskpath, !!exists);
     } else {
-        exist = imgCache.get(diskpath);
+        exists = imgCache.get(diskpath);
     }
 
     if (exists) {
-        return 'i/' + encodeURIComponent(specialEncode(mainanme)) + '.webp';
+        return 'i/' + encodeURIComponent(specialEncode(mainname)) + '.webp';
     }
     return null;
 };
@@ -218,10 +215,12 @@ for (let i = 0; i < files.length; i++) {
             e.remove();
         });
 
-        container.querySelectorAll('[src]').forEach(e => {
-            const src = e.getAttribute('src');
-            const width = e.getAttribute('width');
-            const height = e.getAttribute('height');
+        container.querySelectorAll('[src],[data-src]').forEach(e => {
+
+            const src = e.getAttribute('src') || e.getAttribute('data-src');
+            const width = e.getAttribute('width') || e.getAttribute('data-width');
+            const height = e.getAttribute('height') || e.getAttribute('data-height');
+
             const srclocal = getimgsrc(src.split('/').slice(-1)[0]);
 
             if (srclocal == null) {
@@ -244,7 +243,7 @@ for (let i = 0; i < files.length; i++) {
             target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
         });
 
-        container.querySelectorAll('[data-src]').forEach(e => {
+        /*container.querySelectorAll('[data-src]').forEach(e => {
             const src = e.getAttribute('data-src');
             const width = e.getAttribute('data-width');
             const height = e.getAttribute('data-height');
@@ -273,7 +272,7 @@ for (let i = 0; i < files.length; i++) {
 
             const target = e.parentNode.tagName == 'A' ? e.parentNode : e;
             target.replaceWith(`<img src="${srclocal}" width="${width2}" height="${height2}" />`);
-        });
+        });*/
 
         const citations = {};
         const citationsIndirect = {};
@@ -664,7 +663,7 @@ console.log('wrote redirects:', keys.length);
 const unmatched = [];
 const images = fs.readdirSync('./i');
 for (const img of images) {
-    if (!imgCache.has('i/' + img) || !imgCache.get('i/' + img)) {
+    if (!imgCache.get('i/' + img)) {
         unmatched.push(img);
     }
 }
