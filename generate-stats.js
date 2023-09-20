@@ -1,38 +1,75 @@
 const nodeHTMLParser = require('node-html-parser');
-const fs = require('fs');
-
-if (!fs.existsSync('index/')) {
-    fs.mkdirSync('index/');
-}
-
-const stats_images = fs.openSync('index/images.json', 'w');
-const stats_links = fs.openSync('index/links.json', 'w');
-const stats_redirects = fs.openSync('index/redirects.json', 'w');
+const fs = require('fs/promises');
 
 let timeSum = 1;
 let count = 1;
-const files = fs.readdirSync('./html');
 
 const images_all = {};
 const links_all = {};
 const redirects = [];
 
-let comma = false;
+(async function () {
 
-for (let i = 0; i < files.length; i++) {
-    const f = files[i];
+const files = await fs.readdir('./html');
 
-    if (!f.match(/\.html$/) || f == 'index.html') continue;
-    const rem = ((files.length - i) * (timeSum / count) / 3600).toFixed(2);
-    console.log(`${i+1}/${files.length}, ETA ${rem}h`);
+const stats_images = await fs.open('index/images.json', 'w');
+const stats_links = await fs.open('index/links.json', 'w');
+const stats_redirects = await fs.open('index/redirects.json', 'w');
+
+try {
+    await fs.access('index/')
+} catch {
+    await fs.mkdir('index/');
+}
+
+for (let i = 0; i < files.length; i += 10) {
 
     const start = +new Date();
 
-    try {
+    await Promise.all([
+        process(files[i + 0]),
+        process(files[i + 1]),
+        process(files[i + 2]),
+        process(files[i + 3]),
+        process(files[i + 4]),
+        process(files[i + 5]),
+        process(files[i + 6]),
+        process(files[i + 7]),
+        process(files[i + 8]),
+        process(files[i + 9]),
+    ]);
 
-        const t = fs.openSync('html/' + f, 'r');
-        const html = fs.readFileSync(t);
-        fs.closeSync(t);
+    const end = +new Date();
+    const fullDuration = (end - start) / 1000;
+    timeSum += fullDuration;
+    count++;
+
+    const rem = ((files.length - i) / 10 * (timeSum / count) / 3600).toFixed(2);
+    console.log(`${i+1}/${files.length}, ETA ${rem}h`);
+}
+
+await fs.writeFile(stats_redirects, '{\n' + redirects.join(',\n') + '\n}\n');
+await fs.writeFile(stats_images, '{\n' + Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+await fs.writeFile(stats_links, '{\n' + Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
+
+await stats_images.close();
+await stats_links.close();
+await stats_redirects.close();
+
+})();
+
+async function process(f) {
+
+    if (f == null || !f.match(/\.html$/) || f == 'index.html') {
+        return false;
+    }
+
+    try {
+        //const t = fs.openSync('html/' + f, 'r');
+        //const html = fs.readFileSync(t);
+        //fs.closeSync(t);
+
+        const html = await fs.readFile('html/' + f, { encoding: 'utf-8' });
 
         const doc = nodeHTMLParser.parse(html);
 
@@ -44,18 +81,12 @@ for (let i = 0; i < files.length; i++) {
         const redirectsLC = redirects1.map(r => r.toLowerCase());
         const redirects2 = redirects1.filter((v,i,a) => redirectsLC.indexOf(v.toLowerCase()) == i);
 
-        //const descElem = doc.querySelector('#pcs-edit-section-title-description');
-        //const addDescElemt = doc.querySelector('#pcs-edit-section-add-title-description');
-        //const description = addDescElemt && !descElem ? '' : descElem.innerText.trim();
         const description = doc.querySelector('.shortdescription')?.innerText;
 
         const list = JSON.stringify({ [f]: [title].concat(redirects2).concat(description ? {d:description} : []) }).slice(1,-1);
         redirects.push(list);
 
-        if (!comma) comma = true;
-
         doc.querySelectorAll('[src],[data-src]').forEach((e,i) => {
-
 
             const src = e.getAttribute('src') || e.getAttribute('data-src');
 
@@ -95,16 +126,5 @@ for (let i = 0; i < files.length; i++) {
         console.log(f);
     }
 
-    const end = +new Date();
-    const fullDuration = (end - start) / 1000;
-    timeSum += fullDuration;
-    count++;
+    return true;
 }
-
-fs.writeFileSync(stats_redirects, '{\n' + redirects.join(',\n') + '\n}\n');
-fs.writeFileSync(stats_images, '{\n' + Object.keys(images_all).map(k => JSON.stringify({ [k]: images_all[k] }).slice(1,-1)).join(',\n') + '\n}');
-fs.writeFileSync(stats_links, '{\n' + Object.keys(links_all).map(k => JSON.stringify({ [k]: links_all[k] }).slice(1,-1)).join(',\n') + '\n}');
-
-fs.closeSync(stats_images);
-fs.closeSync(stats_links);
-fs.closeSync(stats_redirects);
