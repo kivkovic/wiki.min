@@ -553,11 +553,11 @@ for (let i = 0; i < files.length; i++) {
         });
 
         container.querySelectorAll('section').forEach(e => {
-            if (e.innerText.length < 200) e.remove();
-        });
-
-        container.querySelectorAll('.pcs-edit-section-header,header,section').forEach(e => {
-            e.replaceWith(e.innerHTML);
+            if (e.innerText.length < 200) {
+                e.remove();
+            } else {
+                e.replaceWith(e.innerHTML);
+            }
         });
 
         container.querySelectorAll('[class=""]').forEach(e => {
